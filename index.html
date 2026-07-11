@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<!-- This is a small tool developed by Adrian Ehrenhofer that helps in the creation of beam problems for the subject of Engineering Mechanics at TU Dresden.
+     The tool is intended for educational purposes.
+     The creation of the software was mostly done with the help of Gemini 3.5 Flash (from Google) and Claude Opus 4.6 (from Anthropic). The main prompts for creating the software can be found in the repository in the PROMPTS.md file.
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'none';">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stabbalkenlastlagerungen: TM-Aufgabenbilder-Editor</title>
+    <meta name="description"
+        content="Browser-basierter SVG-Editor zum Erstellen von Aufgabenbildern für Technische Mechanik (Stäbe, Balken, Lager, Lasten).">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- ═══════════ Top Toolbar ═══════════ -->
+        <header id="toolbar">
+            <div class="toolbar-group toolbar-left">
+                <div class="app-brand">
+                    <svg class="brand-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 20 L12 4 L22 20 Z" />
+                        <line x1="7" y1="12" x2="17" y2="12" />
+                    </svg>
+                    <h1 class="app-title">TM-Aufgabenbilder-Editor</h1>
+                </div>
+            </div>
+            <div class="toolbar-group toolbar-center">
+                <!-- Pointer tool -->
+                <button id="btn-pointer" class="toolbar-btn active" title="Auswählen (V)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" stroke="none">
+                        <path d="M5 3l14 8-6 2-3 6z" />
+                    </svg>
+                </button>
+                <div class="toolbar-divider"></div>
+                <!-- Undo / Redo -->
+                <button id="btn-undo" class="toolbar-btn" title="Rückgängig (Ctrl+Z)" disabled>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 10h10a5 5 0 0 1 0 10H10" />
+                        <polyline points="7 6 3 10 7 14" />
+                    </svg>
+                </button>
+                <button id="btn-redo" class="toolbar-btn" title="Wiederholen (Ctrl+Y)" disabled>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10H11a5 5 0 0 0 0 10h3" />
+                        <polyline points="17 6 21 10 17 14" />
+                    </svg>
+                </button>
+                <div class="toolbar-divider"></div>
+                <!-- Grid controls -->
+                <div class="toolbar-control">
+                    <label class="toggle-label" title="Raster ein/aus">
+                        <input type="checkbox" id="grid-toggle" checked>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="toggle-text">Raster</span>
+                    </label>
+                </div>
+                <div class="toolbar-control">
+                    <label class="input-label" title="Rastergröße in Pixel">
+                        <input type="number" id="grid-size" class="toolbar-input" value="25" min="5" max="100" step="5">
+                        <span>px</span>
+                    </label>
+                </div>
+                <div class="toolbar-divider"></div>
+                <div class="toolbar-control">
+                    <label class="toggle-label" title="Am Raster einrasten">
+                        <input type="checkbox" id="snap-toggle" checked>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="toggle-text">Einrasten</span>
+                    </label>
+                </div>
+                <div class="toolbar-divider"></div>
+                <button id="btn-delete" class="toolbar-btn" title="Ausgewähltes Element löschen (Entf)" disabled>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6l-1 14H6L5 6" />
+                        <path d="M10 11v6M14 11v6" />
+                        <path d="M9 6V4h6v2" />
+                    </svg>
+                </button>
+            </div>
+            <div class="toolbar-group toolbar-right">
+                <button id="btn-random" class="export-btn" title="Zufälliges Aufgabenbild generieren">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+                        <circle cx="15.5" cy="15.5" r="1.5" fill="currentColor" />
+                        <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                    </svg>
+                    <span>Zufall</span>
+                </button>
+                <button id="btn-export-svg" class="export-btn" title="Als SVG-Datei exportieren">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3v12m0 0l-4-4m4 4l4-4" />
+                        <path d="M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2" />
+                    </svg>
+                    <span>SVG</span>
+                </button>
+                <button id="btn-export-png" class="export-btn" title="Als PNG-Bild exportieren">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3v12m0 0l-4-4m4 4l4-4" />
+                        <path d="M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2" />
+                    </svg>
+                    <span>PNG</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- ═══════════ Code Sharing Bar ═══════════ -->
+        <div id="share-bar">
+            <span class="share-label"
+                title="Diesen Code kopieren, um die Zeichnung zu speichern. Alternativ einen Code hier einfügen und 'Laden' klicken. ACHTUNG: Insbesondere die Funktion zum Einfügen von Custom Lastverteilungen kann zu unerwünschtem Verhalten führen, weil es Code Execution erlaubt. Bitte nur Code einfügen, den Sie verstehen und dem Sie vertrauen.">Zeichnungs-Code:</span>
+            <input type="text" id="state-code-input" placeholder="Warten auf Zeichnung..." />
+            <button id="btn-copy-code" class="share-btn" title="Code in Zwischenablage kopieren">Kopieren</button>
+            <button id="btn-load-code" class="share-btn" title="Zeichnung aus eingegebenem Code laden">Laden</button>
+        </div>
+
+        <div id="main-content">
+            <aside id="toolbox">
+                <!-- Stäbe -->
+                <div class="toolbox-section">
+                    <h3 class="section-title">Stäbe</h3>
+                    <div class="tool-grid">
+                        <button class="tool-item" data-tool="beam" title="Balken">
+                            <svg viewBox="0 0 64 28" class="tool-icon">
+                                <rect x="4" y="9" width="56" height="10" fill="#64748b" stroke="#334155"
+                                    stroke-width="1.2" rx="1" />
+                            </svg>
+                            <span class="tool-label">Balken</span>
+                        </button>
+                        <button class="tool-item" data-tool="curved_beam" title="Balken (gebogen)">
+                            <svg viewBox="0 0 64 28" class="tool-icon">
+                                <path d="M 8 20 A 24 24 0 0 1 56 20" fill="none" stroke="#64748b" stroke-width="6"
+                                    stroke-linecap="butt" />
+                                <path d="M 8 20 A 24 24 0 0 1 56 20" fill="none" stroke="#334155" stroke-width="7.2"
+                                    stroke-linecap="butt" style="z-index:-1" />
+                            </svg>
+                            <span class="tool-label">Geb. Balken</span>
+                        </button>
+                        <button class="tool-item" data-tool="bar" title="Stab (Pendelstab)">
+                            <svg viewBox="0 0 64 28" class="tool-icon">
+                                <rect x="8" y="12" width="48" height="4" fill="#64748b" stroke="#334155"
+                                    stroke-width="1" rx="0.5" />
+                                <circle cx="8" cy="14" r="3.5" fill="white" stroke="#334155" stroke-width="1.2" />
+                                <circle cx="56" cy="14" r="3.5" fill="white" stroke="#334155" stroke-width="1.2" />
+                            </svg>
+                            <span class="tool-label">Stab</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lager -->
+                <div class="toolbox-section">
+                    <h3 class="section-title">Lager</h3>
+                    <div class="tool-grid">
+                        <button class="tool-item" data-tool="festlager" title="Festlager (festes Auflager)">
+                            <svg viewBox="0 0 64 44" class="tool-icon">
+                                <polygon points="32,6 18,26 46,26" fill="none" stroke="#334155" stroke-width="2" />
+                                <line x1="14" y1="26" x2="50" y2="26" stroke="#334155" stroke-width="2" />
+                                <line x1="18" y1="26" x2="14" y2="33" stroke="#334155" stroke-width="1.2" />
+                                <line x1="24" y1="26" x2="20" y2="33" stroke="#334155" stroke-width="1.2" />
+                                <line x1="30" y1="26" x2="26" y2="33" stroke="#334155" stroke-width="1.2" />
+                                <line x1="36" y1="26" x2="32" y2="33" stroke="#334155" stroke-width="1.2" />
+                                <line x1="42" y1="26" x2="38" y2="33" stroke="#334155" stroke-width="1.2" />
+                                <line x1="48" y1="26" x2="44" y2="33" stroke="#334155" stroke-width="1.2" />
+                            </svg>
+                            <span class="tool-label">Festlager</span>
+                        </button>
+                        <button class="tool-item" data-tool="loslager" title="Loslager (verschiebliches Auflager)">
+                            <svg viewBox="0 0 64 44" class="tool-icon">
+                                <polygon points="32,6 18,26 46,26" fill="none" stroke="#334155" stroke-width="2" />
+                                <line x1="14" y1="26" x2="50" y2="26" stroke="#334155" stroke-width="1.5" />
+                                <line x1="14" y1="30" x2="50" y2="30" stroke="#334155" stroke-width="2" />
+                                <line x1="18" y1="30" x2="14" y2="37" stroke="#334155" stroke-width="1.2" />
+                                <line x1="24" y1="30" x2="20" y2="37" stroke="#334155" stroke-width="1.2" />
+                                <line x1="30" y1="30" x2="26" y2="37" stroke="#334155" stroke-width="1.2" />
+                                <line x1="36" y1="30" x2="32" y2="37" stroke="#334155" stroke-width="1.2" />
+                                <line x1="42" y1="30" x2="38" y2="37" stroke="#334155" stroke-width="1.2" />
+                                <line x1="48" y1="30" x2="44" y2="37" stroke="#334155" stroke-width="1.2" />
+                                <circle cx="32" cy="6" r="2.5" fill="white" stroke="#334155" stroke-width="1.2" />
+                            </svg>
+                            <span class="tool-label">Loslager</span>
+                        </button>
+                        <button class="tool-item" data-tool="einspannung" title="Einspannung (feste Wand)">
+                            <svg viewBox="0 0 64 44" class="tool-icon">
+                                <line x1="36" y1="2" x2="36" y2="42" stroke="#334155" stroke-width="2.5" />
+                                <line x1="36" y1="4" x2="46" y2="12" stroke="#334155" stroke-width="1.2" />
+                                <line x1="36" y1="10" x2="46" y2="18" stroke="#334155" stroke-width="1.2" />
+                                <line x1="36" y1="16" x2="46" y2="24" stroke="#334155" stroke-width="1.2" />
+                                <line x1="36" y1="22" x2="46" y2="30" stroke="#334155" stroke-width="1.2" />
+                                <line x1="36" y1="28" x2="46" y2="36" stroke="#334155" stroke-width="1.2" />
+                                <line x1="36" y1="34" x2="46" y2="42" stroke="#334155" stroke-width="1.2" />
+                                <rect x="10" y="18" width="26" height="8" fill="#64748b" stroke="#334155"
+                                    stroke-width="1" rx="1" />
+                            </svg>
+                            <span class="tool-label">Einspannung</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Verbindungen -->
+                <div class="toolbox-section">
+                    <h3 class="section-title">Verbindungen</h3>
+                    <div class="tool-grid">
+                        <button class="tool-item" data-tool="gelenk" title="Gelenk (Kugelgelenk / Bolzenverbindung)">
+                            <svg viewBox="0 0 64 28" class="tool-icon">
+                                <rect x="4" y="10" width="22" height="8" fill="#64748b" stroke="#334155"
+                                    stroke-width="1" rx="1" />
+                                <rect x="38" y="10" width="22" height="8" fill="#64748b" stroke="#334155"
+                                    stroke-width="1" rx="1" />
+                                <circle cx="32" cy="14" r="6" fill="white" stroke="#334155" stroke-width="2" />
+                            </svg>
+                            <span class="tool-label">Gelenk</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schnitte & Querschnitte -->
+                <div class="toolbox-section">
+                    <h3 class="section-title">Schnitte</h3>
+                    <div class="tool-grid">
+                        <button class="tool-item" data-tool="section_cut" title="Schnittlinie A-A">
+                            <svg viewBox="0 0 64 28" class="tool-icon">
+                                <line x1="32" y1="2" x2="32" y2="26" stroke="#334155" stroke-width="1"
+                                    stroke-dasharray="3,2,1,2" />
+                                <line x1="32" y1="2" x2="32" y2="6" stroke="#334155" stroke-width="2.5" />
+                                <line x1="32" y1="22" x2="32" y2="26" stroke="#334155" stroke-width="2.5" />
+                                <line x1="32" y1="4" x2="44" y2="4" stroke="#334155" stroke-width="1.3" />
+                                <polygon points="48,4 40,1 40,7" fill="#334155" />
+                                <text x="52" y="8" font-size="9" font-family="sans-serif" font-weight="bold"
+                                    fill="#334155">A</text>
+                            </svg>
+                            <span class="tool-label">Schnittlinie</span>
+                        </button>
+                        <button class="tool-item" data-tool="cross_section" title="Querschnitts-Zeichnung">
+                            <svg viewBox="0 0 64 28" class="tool-icon">
+                                <line x1="8" y1="14" x2="56" y2="14" stroke="#94a3b8" stroke-width="0.8"
+                                    stroke-dasharray="2,2" />
+                                <line x1="32" y1="2" x2="32" y2="26" stroke="#94a3b8" stroke-width="0.8"
+                                    stroke-dasharray="2,2" />
+                                <rect x="22" y="4" width="20" height="20" fill="#e2e8f0" stroke="#334155"
+                                    stroke-width="1.3" rx="0.5" />
+                                <circle cx="32" cy="14" r="4" fill="white" stroke="#334155" stroke-width="1.2"
+                                    stroke-dasharray="2,2" />
+                            </svg>
+                            <span class="tool-label">Querschnitt</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lasten -->
+                <div class="toolbox-section">
+                    <h3 class="section-title">Lasten</h3>
+                    <div class="tool-grid">
+                        <button class="tool-item" data-tool="einzelkraft" title="Einzelkraft (Kraftpfeil)">
+                            <svg viewBox="0 0 64 28" class="tool-icon">
+                                <line x1="6" y1="14" x2="48" y2="14" stroke="#334155" stroke-width="2.5" />
+                                <polygon points="58,14 46,8 46,20" fill="#334155" />
+                            </svg>
+                            <span class="tool-label">Einzelkraft</span>
+                        </button>
+                        <button class="tool-item" data-tool="streckenlast" title="Streckenlast (verteilte Last)">
+                            <svg viewBox="0 0 64 36" class="tool-icon">
+                                <line x1="6" y1="6" x2="58" y2="6" stroke="#334155" stroke-width="1.3" />
+                                <line x1="12" y1="6" x2="12" y2="26" stroke="#334155" stroke-width="1.3" />
+                                <polygon points="12,30 9,24 15,24" fill="#334155" />
+                                <line x1="24" y1="6" x2="24" y2="26" stroke="#334155" stroke-width="1.3" />
+                                <polygon points="24,30 21,24 27,24" fill="#334155" />
+                                <line x1="36" y1="6" x2="36" y2="26" stroke="#334155" stroke-width="1.3" />
+                                <polygon points="36,30 33,24 39,24" fill="#334155" />
+                                <line x1="48" y1="6" x2="48" y2="26" stroke="#334155" stroke-width="1.3" />
+                                <polygon points="48,30 45,24 51,24" fill="#334155" />
+                            </svg>
+                            <span class="tool-label">Streckenlast</span>
+                        </button>
+                        <button class="tool-item" data-tool="moment" title="Moment (Drehmoment)">
+                            <svg viewBox="0 0 64 40" class="tool-icon">
+                                <path d="M 40 10 A 12 12 0 1 0 40 30" fill="none" stroke="#334155" stroke-width="2" />
+                                <polygon points="40,30 34,24 36,30" fill="#334155" />
+                            </svg>
+                            <span class="tool-label">Moment</span>
+                        </button>
+
+                        <div class="toolbox-section">
+                            <h3 class="section-title">Beschriftung</h3>
+                            <div class="tool-grid">
+                                <button class="tool-item" data-tool="dimension" title="Bemaßung (Maßlinie)">
+                                    <svg viewBox="0 0 64 28" class="tool-icon">
+                                        <line x1="8" y1="4" x2="8" y2="24" stroke="#334155" stroke-width="1.3" />
+                                        <line x1="56" y1="4" x2="56" y2="24" stroke="#334155" stroke-width="1.3" />
+                                        <line x1="8" y1="14" x2="56" y2="14" stroke="#334155" stroke-width="1.3" />
+                                        <polygon points="8,14 14,11 14,17" fill="#334155" />
+                                        <polygon points="56,14 50,11 50,17" fill="#334155" />
+                                        <text x="32" y="11" text-anchor="middle" font-size="9"
+                                            font-family="Inter, sans-serif" font-style="italic" fill="#334155">a</text>
+                                    </svg>
+                                    <span class="tool-label">Bemaßung</span>
+                                </button>
+                                <button class="tool-item" data-tool="label" title="Textbeschriftung">
+                                    <svg viewBox="0 0 64 28" class="tool-icon">
+                                        <text x="32" y="22" text-anchor="middle" font-size="20" font-weight="600"
+                                            font-family="Inter, sans-serif" fill="#334155">A</text>
+                                    </svg>
+                                    <span class="tool-label">Text</span>
+                            </div>
+                        </div>
+
+                        <!-- Zeichnen & Koordinaten -->
+                        <div class="toolbox-section">
+                            <h3 class="section-title">Zeichnen & Koordinaten</h3>
+                            <div class="tool-grid">
+                                <button class="tool-item" data-tool="line" title="Freie Linie">
+                                    <svg viewBox="0 0 64 28" class="tool-icon">
+                                        <line x1="8" y1="20" x2="56" y2="8" stroke="#334155" stroke-width="2" />
+                                    </svg>
+                                    <span class="tool-label">Linie</span>
+                                </button>
+                                <button class="tool-item" data-tool="arrow" title="Freier Pfeil">
+                                    <svg viewBox="0 0 64 28" class="tool-icon">
+                                        <line x1="8" y1="20" x2="52" y2="8" stroke="#334155" stroke-width="2" />
+                                        <polygon points="52,8 44,14 47,8 44,4" fill="#334155" />
+                                    </svg>
+                                    <span class="tool-label">Pfeil</span>
+                                </button>
+                                <button class="tool-item" data-tool="coord_system_xy" title="x-y-Koordinatensystem">
+                                    <svg viewBox="0 0 64 36" class="tool-icon">
+                                        <line x1="16" y1="28" x2="16" y2="8" stroke="#334155" stroke-width="1.3" />
+                                        <polygon points="16,8 13,12 19,12" fill="#334155" />
+                                        <text x="24" y="11" font-size="8" font-family="Inter, sans-serif"
+                                            fill="#334155">y</text>
+                                        <line x1="16" y1="28" x2="48" y2="28" stroke="#334155" stroke-width="1.3" />
+                                        <polygon points="48,28 44,25 44,31" fill="#334155" />
+                                        <text x="52" y="27" font-size="8" font-family="Inter, sans-serif"
+                                            fill="#334155">x</text>
+                                    </svg>
+                                    <span class="tool-label">Ksys (x-y)</span>
+                                </button>
+                                <button class="tool-item" data-tool="coord_system_x" title="x-Koordinatenachse">
+                                    <svg viewBox="0 0 64 28" class="tool-icon">
+                                        <line x1="12" y1="18" x2="48" y2="18" stroke="#334155" stroke-width="1.3" />
+                                        <polygon points="48,18 44,15 44,21" fill="#334155" />
+                                        <text x="52" y="17" font-size="8" font-family="Inter, sans-serif"
+                                            fill="#334155">x</text>
+                                    </svg>
+                                    <span class="tool-label">Ksys (x)</span>
+                                </button>
+                            </div>
+                        </div>
+            </aside>
+
+            <!-- ═══════════ SVG Canvas ═══════════ -->
+            <main id="canvas-container">
+                <svg id="canvas" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <!-- Grid patterns (updated dynamically by canvas.js) -->
+                        <pattern id="grid-minor" width="25" height="25" patternUnits="userSpaceOnUse">
+                            <path d="M 25 0 L 0 0 0 25" fill="none" stroke="#e5e7eb" stroke-width="0.5" />
+                        </pattern>
+                        <pattern id="grid-major" width="125" height="125" patternUnits="userSpaceOnUse">
+                            <rect width="125" height="125" fill="url(#grid-minor)" />
+                            <path d="M 125 0 L 0 0 0 125" fill="none" stroke="#cbd5e1" stroke-width="0.8" />
+                        </pattern>
+                        <!-- Arrowhead marker for dimension lines -->
+                        <marker id="arrowhead-left" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+                            <polygon points="8,0 0,3 8,6" fill="#1e293b" />
+                        </marker>
+                        <marker id="arrowhead-right" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0,0 8,3 0,6" fill="#1e293b" />
+                        </marker>
+                        <filter id="outline" x="-20%" y="-20%" width="140%" height="140%">
+                            <feMorphology operator="dilate" radius="1.5" in="SourceAlpha" result="dilated" />
+                            <feColorMatrix type="matrix" values="0 0 0 0 0.12   0 0 0 0 0.16   0 0 0 0 0.23  0 0 0 1 0"
+                                in="dilated" result="coloredOutline" />
+                            <feMerge>
+                                <feMergeNode in="coloredOutline" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <rect id="grid-bg" width="16000" height="10000" fill="white" x="-4000" y="-2500" />
+                    <rect id="grid-rect" width="16000" height="10000" fill="url(#grid-major)" x="-4000" y="-2500" />
+                    <g id="elements-layer">
+                        <g id="beams-layer" filter="url(#outline)"></g>
+                        <g id="other-elements-layer"></g>
+                    </g>
+                    <g id="ghost-layer" opacity="0.4">
+                        <g id="ghost-beams-layer" filter="url(#outline)"></g>
+                        <g id="ghost-other-layer"></g>
+                    </g>
+                    <g id="ui-layer"></g>
+                </svg>
+            </main>
+
+            <!-- Right Sidebar — Properties -->
+            <aside id="properties-panel">
+                <h3 class="panel-title">Eigenschaften</h3>
+                <div id="properties-content">
+                    <div class="no-selection" id="no-selection-msg">
+                        <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="#94a3b8" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="8" y="8" width="32" height="32" rx="4" />
+                            <path d="M16 28 L22 22 L28 26 L36 18" />
+                            <circle cx="16" cy="18" r="2.5" />
+                        </svg>
+                        <p class="hint-title">Kein Element ausgewählt</p>
+                        <p class="hint-text">Wählen Sie ein Werkzeug und klicken Sie auf die Zeichenfläche, oder wählen
+                            Sie ein bestehendes Element aus.</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- ═══════════ Status Bar ═══════════ -->
+        <footer id="status-bar">
+            <div class="status-left">
+                <span id="status-coords" class="status-item">X: 0 &nbsp; Y: 0</span>
+                <span class="status-sep">·</span>
+                <span id="status-grid" class="status-item">Raster: 25 px</span>
+            </div>
+            <div class="status-center">
+                <button id="btn-zoom-out" class="status-btn" title="Verkleinern">−</button>
+                <span id="status-zoom" class="status-item status-zoom">100%</span>
+                <button id="btn-zoom-in" class="status-btn" title="Vergrößern">+</button>
+                <button id="btn-zoom-fit" class="status-btn" title="Einpassen">⊡</button>
+            </div>
+            <div class="status-right">
+                <span id="status-elements" class="status-item">0 Elemente</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
