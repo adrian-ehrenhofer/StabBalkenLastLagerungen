@@ -58,12 +58,17 @@ export const ELEMENT_TYPES = {
     moment: {
         name: 'Moment',
         category: 'lasten',
-        defaults: { radius: 25, label: 'M', direction: 'cw' },
+        defaults: { radius: 25, label: 'M', direction: 'cw', arcAngle: 270 },
     },
     dimension: {
         name: 'Bemaßung',
         category: 'beschriftung',
         defaults: { length: 200, label: 'a', offset: 8 },
+    },
+    angle: {
+        name: 'Winkel',
+        category: 'beschriftung',
+        defaults: { radius: 35, startAngle: 0, arcAngle: 90, label: 'α', style: 'arc', arrows: 'both' },
     },
     label: {
         name: 'Text',
@@ -168,6 +173,8 @@ export function getElementBounds(elem) {
             return { x: -p.radius - 5, y: -p.radius - 5, width: (p.radius + 5) * 2, height: (p.radius + 5) * 2 };
         case 'dimension':
             return { x: 0, y: -p.offset - 10, width: p.length, height: p.offset + 20 };
+        case 'angle':
+            return { x: -p.radius - 15, y: -p.radius - 15, width: (p.radius + 15) * 2, height: (p.radius + 15) * 2 };
         case 'label':
             return { x: -5, y: -p.fontSize, width: p.fontSize * String(p.text).length * 0.6 + 10, height: p.fontSize + 5 };
         default:
@@ -228,6 +235,7 @@ const RENDERERS = {
     streckenlast: renderStreckenlast,
     moment: renderMoment,
     dimension: renderDimension,
+    angle: renderAngle,
     label: renderLabel,
 };
 
@@ -494,13 +502,11 @@ function renderStreckenlast(g, props) {
 function renderMoment(g, props) {
     const r = props.radius || 25;
     const dir = props.direction || 'cw';
+    const arcAngle = props.arcAngle !== undefined ? props.arcAngle : 270;
     const headLen = 8;
 
-    // Arc (about 270 degrees)
-    // For CW: arc from top going clockwise
-    // For CCW: arc from top going counter-clockwise
     const startAngle = -90;
-    const sweep = dir === 'cw' ? 270 : -270;
+    const sweep = dir === 'cw' ? arcAngle : -arcAngle;
     const endAngle = startAngle + sweep;
 
     const startRad = startAngle * Math.PI / 180;
@@ -520,12 +526,11 @@ function renderMoment(g, props) {
     }));
 
     // Arrowhead at the end of the arc
-    // Calculate tangent direction at the end point
-    const tangentAngle = endRad + (dir === 'cw' ? Math.PI / 2 : -Math.PI / 2);
-    const ax = x2 + headLen * Math.cos(tangentAngle + 0.4);
-    const ay = y2 + headLen * Math.sin(tangentAngle + 0.4);
-    const bx = x2 + headLen * Math.cos(tangentAngle - 0.4);
-    const by = y2 + headLen * Math.sin(tangentAngle - 0.4);
+    const tangentAngle = endRad + (sweep > 0 ? Math.PI / 2 : -Math.PI / 2);
+    const ax = x2 - headLen * Math.cos(tangentAngle + 0.4);
+    const ay = y2 - headLen * Math.sin(tangentAngle + 0.4);
+    const bx = x2 - headLen * Math.cos(tangentAngle - 0.4);
+    const by = y2 - headLen * Math.sin(tangentAngle - 0.4);
 
     g.appendChild(svg('polygon', {
         points: `${x2},${y2} ${ax},${ay} ${bx},${by}`,
@@ -590,6 +595,100 @@ function renderDimension(g, props) {
             'font-style': 'italic', 'font-weight': '500',
             fill: '#1e293b',
         })).textContent = label;
+    }
+}
+
+/* ─── Angle Marker (Winkelbemaßung) ─── */
+function renderAngle(g, props) {
+    const r = props.radius || 35;
+    const saDeg = props.startAngle || 0;
+    const arcDeg = props.arcAngle !== undefined ? props.arcAngle : 90;
+    const style = props.style || 'arc'; // 'arc' or 'square'
+    const arrows = props.arrows || 'both'; // 'both', 'end', 'start', 'dot', 'none'
+    const label = props.label || 'α';
+    const headLen = 7;
+
+    const sa = saDeg * Math.PI / 180;
+    const ea = (saDeg + arcDeg) * Math.PI / 180;
+
+    if (style === 'square') {
+        const x1 = r * Math.cos(sa), y1 = r * Math.sin(sa);
+        const x2 = r * Math.cos(ea), y2 = r * Math.sin(ea);
+        const cx = x1 + x2, cy = y1 + y2;
+
+        g.appendChild(svg('polyline', {
+            points: `${x1},${y1} ${cx},${cy} ${x2},${y2}`,
+            fill: 'none', stroke: '#1e293b', 'stroke-width': 1.5,
+        }));
+
+        if (arrows === 'dot') {
+            g.appendChild(svg('circle', {
+                cx: cx * 0.5, cy: cy * 0.5, r: 2.5,
+                fill: '#1e293b',
+            }));
+        }
+    } else {
+        const x1 = r * Math.cos(sa), y1 = r * Math.sin(sa);
+        const x2 = r * Math.cos(ea), y2 = r * Math.sin(ea);
+
+        const largeArc = Math.abs(arcDeg) > 180 ? 1 : 0;
+        const sweepFlag = arcDeg > 0 ? 1 : 0;
+
+        g.appendChild(svg('path', {
+            d: `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} ${sweepFlag} ${x2} ${y2}`,
+            fill: 'none', stroke: '#1e293b', 'stroke-width': 1.5,
+        }));
+
+        if (arrows === 'both' || arrows === 'end') {
+            const taEnd = ea + (arcDeg > 0 ? Math.PI / 2 : -Math.PI / 2);
+            const ax = x2 - headLen * Math.cos(taEnd - 0.35);
+            const ay = y2 - headLen * Math.sin(taEnd - 0.35);
+            const bx = x2 - headLen * Math.cos(taEnd + 0.35);
+            const by = y2 - headLen * Math.sin(taEnd + 0.35);
+            g.appendChild(svg('polygon', {
+                points: `${x2},${y2} ${ax},${ay} ${bx},${by}`,
+                fill: '#1e293b',
+            }));
+        }
+
+        if (arrows === 'both' || arrows === 'start') {
+            const taStart = sa + (arcDeg > 0 ? -Math.PI / 2 : Math.PI / 2);
+            const ax = x1 - headLen * Math.cos(taStart - 0.35);
+            const ay = y1 - headLen * Math.sin(taStart - 0.35);
+            const bx = x1 - headLen * Math.cos(taStart + 0.35);
+            const by = y1 - headLen * Math.sin(taStart + 0.35);
+            g.appendChild(svg('polygon', {
+                points: `${x1},${y1} ${ax},${ay} ${bx},${by}`,
+                fill: '#1e293b',
+            }));
+        }
+
+        if (arrows === 'dot') {
+            const midRad = (sa + ea) / 2;
+            g.appendChild(svg('circle', {
+                cx: (r * 0.5) * Math.cos(midRad),
+                cy: (r * 0.5) * Math.sin(midRad),
+                r: 2.5,
+                fill: '#1e293b',
+            }));
+        }
+    }
+
+    if (label) {
+        const midRad = (sa + ea) / 2;
+        const labelR = r + 14;
+        const lx = labelR * Math.cos(midRad);
+        const ly = labelR * Math.sin(midRad);
+
+        const textEl = svg('text', {
+            x: lx, y: ly + 4,
+            'text-anchor': 'middle',
+            'font-size': 16, 'font-family': 'Inter, sans-serif',
+            'font-style': 'italic', 'font-weight': '500',
+            fill: '#1e293b',
+        });
+        textEl.textContent = label;
+        g.appendChild(textEl);
     }
 }
 

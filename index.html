@@ -89,6 +89,10 @@
                 </button>
             </div>
             <div class="toolbar-group toolbar-right">
+                <button id="btn-help" class="export-btn help-btn" title="Hilfe & Werkzeugübersicht öffnen">
+                    <span class="info-bubble-icon">?</span>
+                    <span>Hilfe</span>
+                </button>
                 <button id="btn-random" class="export-btn" title="Zufälliges Aufgabenbild generieren">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -107,7 +111,7 @@
                     </svg>
                     <span>SVG</span>
                 </button>
-                <button id="btn-export-png" class="export-btn" title="Als PNG-Bild exportieren">
+                <button id="btn-export-png" class="export-btn" title="Als PNG-Bild mit schmalem Rand exportieren">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 3v12m0 0l-4-4m4 4l4-4" />
@@ -121,7 +125,10 @@
         <!-- ═══════════ Code Sharing Bar ═══════════ -->
         <div id="share-bar">
             <span class="share-label"
-                title="Diesen Code kopieren, um die Zeichnung zu speichern. Alternativ einen Code hier einfügen und 'Laden' klicken. ACHTUNG: Insbesondere die Funktion zum Einfügen von Custom Lastverteilungen kann zu unerwünschtem Verhalten führen, weil es Code Execution erlaubt. Bitte nur Code einfügen, den Sie verstehen und dem Sie vertrauen.">Zeichnungs-Code:</span>
+                title="Diesen Code kopieren, um die Zeichnung zu speichern. Alternativ einen Code hier einfügen und 'Laden' klicken. ACHTUNG: Insbesondere die Funktion zum Einfügen von Custom Lastverteilungen kann zu unerwünschtem Verhalten führen, weil es Code Execution erlaubt. Bitte nur Code einfügen, den Sie verstehen und dem Sie vertrauen.">
+                Zeichnungs-Code:
+                <span class="info-bubble" title="Kopieren Sie diesen Code zum Speichern der Zeichnung oder fügen Sie einen Code ein und klicken auf 'Laden'">?</span>
+            </span>
             <input type="text" id="state-code-input" placeholder="Warten auf Zeichnung..." />
             <button id="btn-copy-code" class="share-btn" title="Code in Zwischenablage kopieren">Kopieren</button>
             <button id="btn-load-code" class="share-btn" title="Zeichnung aus eingegebenem Code laden">Laden</button>
@@ -131,7 +138,7 @@
             <aside id="toolbox">
                 <!-- Stäbe -->
                 <div class="toolbox-section">
-                    <h3 class="section-title">Stäbe</h3>
+                    <h3 class="section-title">Stäbe <span class="info-bubble" title="Balken, gebogene Balken und Pendelstäbe zeichnen">?</span></h3>
                     <div class="tool-grid">
                         <button class="tool-item" data-tool="beam" title="Balken">
                             <svg viewBox="0 0 64 28" class="tool-icon">
@@ -163,7 +170,7 @@
 
                 <!-- Lager -->
                 <div class="toolbox-section">
-                    <h3 class="section-title">Lager</h3>
+                    <h3 class="section-title">Lager <span class="info-bubble" title="Festlager, Loslager und Einspannungen an Balken anbringen">?</span></h3>
                     <div class="tool-grid">
                         <button class="tool-item" data-tool="festlager" title="Festlager (festes Auflager)">
                             <svg viewBox="0 0 64 44" class="tool-icon">
@@ -212,7 +219,7 @@
 
                 <!-- Verbindungen -->
                 <div class="toolbox-section">
-                    <h3 class="section-title">Verbindungen</h3>
+                    <h3 class="section-title">Verbindungen <span class="info-bubble" title="Gelenke zwischen Stäben/Balken platzieren">?</span></h3>
                     <div class="tool-grid">
                         <button class="tool-item" data-tool="gelenk" title="Gelenk (Kugelgelenk / Bolzenverbindung)">
                             <svg viewBox="0 0 64 28" class="tool-icon">
@@ -229,7 +236,7 @@
 
                 <!-- Schnitte & Querschnitte -->
                 <div class="toolbox-section">
-                    <h3 class="section-title">Schnitte</h3>
+                    <h3 class="section-title">Schnitte <span class="info-bubble" title="Schnittlinien (A-A) und Querschnitte erstellen">?</span></h3>
                     <div class="tool-grid">
                         <button class="tool-item" data-tool="section_cut" title="Schnittlinie A-A">
                             <svg viewBox="0 0 64 28" class="tool-icon">
@@ -262,7 +269,7 @@
 
                 <!-- Lasten -->
                 <div class="toolbox-section">
-                    <h3 class="section-title">Lasten</h3>
+                    <h3 class="section-title">Lasten <span class="info-bubble" title="Einzelkräfte, Streckenlasten und Drehmomente (mit anpassbarem Öffnungswinkel z.B. Halbkreis) anbringen">?</span></h3>
                     <div class="tool-grid">
                         <button class="tool-item" data-tool="einzelkraft" title="Einzelkraft (Kraftpfeil)">
                             <svg viewBox="0 0 64 28" class="tool-icon">
@@ -285,41 +292,56 @@
                             </svg>
                             <span class="tool-label">Streckenlast</span>
                         </button>
-                        <button class="tool-item" data-tool="moment" title="Moment (Drehmoment)">
+                        <button class="tool-item" data-tool="moment" title="Moment (Drehmoment, z.B. 180° Halbkreis oder 270°)">
                             <svg viewBox="0 0 64 40" class="tool-icon">
                                 <path d="M 40 10 A 12 12 0 1 0 40 30" fill="none" stroke="#334155" stroke-width="2" />
                                 <polygon points="40,30 34,24 36,30" fill="#334155" />
                             </svg>
                             <span class="tool-label">Moment</span>
                         </button>
+                    </div>
+                </div>
 
-                        <div class="toolbox-section">
-                            <h3 class="section-title">Beschriftung</h3>
-                            <div class="tool-grid">
-                                <button class="tool-item" data-tool="dimension" title="Bemaßung (Maßlinie)">
-                                    <svg viewBox="0 0 64 28" class="tool-icon">
-                                        <line x1="8" y1="4" x2="8" y2="24" stroke="#334155" stroke-width="1.3" />
-                                        <line x1="56" y1="4" x2="56" y2="24" stroke="#334155" stroke-width="1.3" />
-                                        <line x1="8" y1="14" x2="56" y2="14" stroke="#334155" stroke-width="1.3" />
-                                        <polygon points="8,14 14,11 14,17" fill="#334155" />
-                                        <polygon points="56,14 50,11 50,17" fill="#334155" />
-                                        <text x="32" y="11" text-anchor="middle" font-size="9"
-                                            font-family="Inter, sans-serif" font-style="italic" fill="#334155">a</text>
-                                    </svg>
-                                    <span class="tool-label">Bemaßung</span>
-                                </button>
-                                <button class="tool-item" data-tool="label" title="Textbeschriftung">
-                                    <svg viewBox="0 0 64 28" class="tool-icon">
-                                        <text x="32" y="22" text-anchor="middle" font-size="20" font-weight="600"
-                                            font-family="Inter, sans-serif" fill="#334155">A</text>
-                                    </svg>
-                                    <span class="tool-label">Text</span>
-                            </div>
-                        </div>
+                <!-- Beschriftung -->
+                <div class="toolbox-section">
+                    <h3 class="section-title">Beschriftung <span class="info-bubble" title="Längen- & Winkelbemaßungen sowie Freitext einfügen">?</span></h3>
+                    <div class="tool-grid">
+                        <button class="tool-item" data-tool="dimension" title="Bemaßung (Maßlinie)">
+                            <svg viewBox="0 0 64 28" class="tool-icon">
+                                <line x1="8" y1="4" x2="8" y2="24" stroke="#334155" stroke-width="1.3" />
+                                <line x1="56" y1="4" x2="56" y2="24" stroke="#334155" stroke-width="1.3" />
+                                <line x1="8" y1="14" x2="56" y2="14" stroke="#334155" stroke-width="1.3" />
+                                <polygon points="8,14 14,11 14,17" fill="#334155" />
+                                <polygon points="56,14 50,11 50,17" fill="#334155" />
+                                <text x="32" y="11" text-anchor="middle" font-size="9"
+                                    font-family="Inter, sans-serif" font-style="italic" fill="#334155">a</text>
+                            </svg>
+                            <span class="tool-label">Bemaßung</span>
+                        </button>
+                        <button class="tool-item" data-tool="angle" title="Winkelbemaßung (Winkel / 90° Rechtwinklig mit Pfeilen)">
+                            <svg viewBox="0 0 64 28" class="tool-icon">
+                                <path d="M 12 22 L 32 22 L 32 6" fill="none" stroke="#334155" stroke-width="1.3" />
+                                <path d="M 28 22 A 16 16 0 0 0 32 10" fill="none" stroke="#334155" stroke-width="1.5" />
+                                <polygon points="28,22 24,19 24,25" fill="#334155" />
+                                <polygon points="32,10 29,14 35,14" fill="#334155" />
+                                <text x="21" y="14" font-size="9" font-family="Inter, sans-serif" font-style="italic" fill="#334155">α</text>
+                            </svg>
+                            <span class="tool-label">Winkel</span>
+                        </button>
+                        <button class="tool-item" data-tool="label" title="Textbeschriftung">
+                            <svg viewBox="0 0 64 28" class="tool-icon">
+                                <text x="32" y="22" text-anchor="middle" font-size="20" font-weight="600"
+                                    font-family="Inter, sans-serif" fill="#334155">A</text>
+                            </svg>
+                            <span class="tool-label">Text</span>
+                        </button>
+                    </div>
+                </div>
 
-                        <!-- Zeichnen & Koordinaten -->
-                        <div class="toolbox-section">
-                            <h3 class="section-title">Zeichnen & Koordinaten</h3>
+                <!-- Zeichnen & Koordinaten -->
+                <div class="toolbox-section">
+                    <h3 class="section-title">Zeichnen & Koordinaten <span class="info-bubble" title="Linien, Pfeile und Koordinatensysteme zeichnen">?</span></h3>
+                    <div class="tool-grid">
                             <div class="tool-grid">
                                 <button class="tool-item" data-tool="line" title="Freie Linie">
                                     <svg viewBox="0 0 64 28" class="tool-icon">
@@ -439,6 +461,47 @@
                 <span id="status-elements" class="status-item">0 Elemente</span>
             </div>
         </footer>
+    </div>
+
+    <!-- ═══════════ Help Modal ═══════════ -->
+    <div id="help-modal" class="modal-backdrop" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><span class="info-bubble-icon">?</span> Hilfe & Werkzeugübersicht</h2>
+                <button id="btn-close-help" class="modal-close-btn" title="Schließen">&times;</button>
+            </div>
+            <div class="modal-body">
+                <section class="help-section">
+                    <h3>Werkzeuge & Funktionen</h3>
+                    <ul>
+                        <li><strong>Auswählen (V):</strong> Elemente anklicken, um sie zu verschieben oder deren Eigenschaften rechts anzupassen. Drag & Drop zum Drehen oder Skalieren.</li>
+                        <li><strong>Stäbe & Balken:</strong> Gerade Balken, gebogene Balken und Pendelstäbe erstellen.</li>
+                        <li><strong>Lager:</strong> Festlager, Loslager (mit Linien oder Rollen) und Einspannungen an Balken verankern.</li>
+                        <li><strong>Lasten:</strong> Einzelkräfte, verteilte Streckenlasten und Momente.
+                            <br><em>Hinweis Moment:</em> Der Öffnungswinkel kann beliebig angepasst werden (z.B. 180° für Halbkreis, 270° Dreiviertelkreis, 90° oder freier Winkel in Grad).</li>
+                        <li><strong>Beschriftung & Winkel:</strong> Bemaßungen, Freitext und Winkelbemaßungen.
+                            <br><em>Hinweis Winkel:</em> Unterstützt Bögen und rechtwinklige 90°-Marker sowie Doppelpfeile, Einzelpfeile oder Punkte.</li>
+                    </ul>
+                </section>
+                <section class="help-section">
+                    <h3>Export & Speichern</h3>
+                    <ul>
+                        <li><strong>PNG-Export:</strong> Erstellt eine Bilddatei mit besonders schmalem weißem Rand.</li>
+                        <li><strong>SVG-Export:</strong> Vektorgrafik im SVG-Format.</li>
+                        <li><strong>Zeichnungs-Code:</strong> Text-Code kopieren zum Speichern und Einfügen.</li>
+                    </ul>
+                </section>
+                <section class="help-section">
+                    <h3>Tastenkombinationen</h3>
+                    <ul>
+                        <li><kbd>V</kbd> Auswählen-Werkzeug</li>
+                        <li><kbd>Entf</kbd> / <kbd>Backspace</kbd> Ausgewähltes Element löschen</li>
+                        <li><kbd>Strg</kbd> + <kbd>Z</kbd> Rückgängig</li>
+                        <li><kbd>Strg</kbd> + <kbd>Y</kbd> Wiederholen</li>
+                    </ul>
+                </section>
+            </div>
+        </div>
     </div>
 
     <script src="js/app.js"></script>

@@ -91,7 +91,7 @@ export function showProperties(elem) {
             addGroup(containerEl, 'Gelenk', () => {
                 const frag = document.createDocumentFragment();
                 frag.appendChild(makeRow('Radius', numberInput(elem.props.radius, v => onChangeFn(elem.id, 'radius', v), { min: 3, max: 20, step: 1 }), 'px'));
-                frag.appendChild(makeRow('Beschr.', textInput(elem.props.label || '', v => onChangeFn(elem.id, 'label', v))));
+                frag.appendChild(makeRow('Beschr.', textInput(elem.props.label || '', v => onChangeFn(elem.id, 'label', v)), null, MATH_LABEL_TOOLTIP));
                 return frag;
             });
             break;
@@ -100,7 +100,7 @@ export function showProperties(elem) {
             addGroup(containerEl, 'Kraft', () => {
                 const frag = document.createDocumentFragment();
                 frag.appendChild(makeRow('Länge', numberInput(elem.props.magnitude, v => onChangeFn(elem.id, 'magnitude', v), { min: 20, max: 300, step: 5 }), 'px'));
-                frag.appendChild(makeRow('Beschr.', textInput(elem.props.label || 'F', v => onChangeFn(elem.id, 'label', v))));
+                frag.appendChild(makeRow('Beschr.', textInput(elem.props.label || 'F', v => onChangeFn(elem.id, 'label', v)), null, MATH_LABEL_TOOLTIP));
                 return frag;
             });
             break;
@@ -112,7 +112,7 @@ export function showProperties(elem) {
                 frag.appendChild(makeRow('Start', numberInput(elem.props.startMag, v => onChangeFn(elem.id, 'startMag', v), { min: 0, step: 5 }), 'px'));
                 frag.appendChild(makeRow('Ende', numberInput(elem.props.endMag, v => onChangeFn(elem.id, 'endMag', v), { min: 0, step: 5 }), 'px'));
                 frag.appendChild(makeRow('Abstand', numberInput(elem.props.arrowSpacing || 25, v => onChangeFn(elem.id, 'arrowSpacing', v), { min: 10, max: 100, step: 5 }), 'px'));
-                frag.appendChild(makeRow('Beschr.', textInput(elem.props.label || 'q₀', v => onChangeFn(elem.id, 'label', v))));
+                frag.appendChild(makeRow('Beschr.', textInput(elem.props.label || 'q₀', v => onChangeFn(elem.id, 'label', v)), null, MATH_LABEL_TOOLTIP));
                 return frag;
             });
             break;
@@ -121,7 +121,14 @@ export function showProperties(elem) {
             addGroup(containerEl, 'Moment', () => {
                 const frag = document.createDocumentFragment();
                 frag.appendChild(makeRow('Radius', numberInput(elem.props.radius, v => onChangeFn(elem.id, 'radius', v), { min: 10, max: 80, step: 5 }), 'px'));
-                frag.appendChild(makeRow('Beschr.', textInput(elem.props.label || 'M', v => onChangeFn(elem.id, 'label', v))));
+                frag.appendChild(makeRow('Öffnungswinkel', numberInput(elem.props.arcAngle !== undefined ? elem.props.arcAngle : 270, v => onChangeFn(elem.id, 'arcAngle', v), { min: 10, max: 360, step: 5 }), '°'));
+                frag.appendChild(makeRow('Vorlagen', selectInput(String(elem.props.arcAngle || 270), [
+                    { value: '180', label: '180° (Halbkreis)' },
+                    { value: '270', label: '270° (3/4 Kreis)' },
+                    { value: '90', label: '90° (Viertelkreis)' },
+                    { value: '360', label: '360° (Vollkreis)' },
+                ], v => onChangeFn(elem.id, 'arcAngle', parseFloat(v)))));
+                frag.appendChild(makeRow('Beschr.', textInput(elem.props.label || 'M', v => onChangeFn(elem.id, 'label', v)), null, MATH_LABEL_TOOLTIP));
                 frag.appendChild(makeRow('Richtung', selectInput(elem.props.direction || 'cw', [
                     { value: 'cw', label: 'Im Uhrzeigersinn' },
                     { value: 'ccw', label: 'Gegen Uhrzeigersinn' },
@@ -134,8 +141,30 @@ export function showProperties(elem) {
             addGroup(containerEl, 'Bemaßung', () => {
                 const frag = document.createDocumentFragment();
                 frag.appendChild(makeRow('Länge', numberInput(elem.props.length, v => onChangeFn(elem.id, 'length', v), { min: 25, step: 25 }), 'px'));
-                frag.appendChild(makeRow('Beschr.', textInput(elem.props.label || 'a', v => onChangeFn(elem.id, 'label', v))));
+                frag.appendChild(makeRow('Beschr.', textInput(elem.props.label || 'a', v => onChangeFn(elem.id, 'label', v)), null, MATH_LABEL_TOOLTIP));
                 frag.appendChild(makeRow('Offset', numberInput(elem.props.offset || 8, v => onChangeFn(elem.id, 'offset', v), { min: 2, max: 30, step: 1 }), 'px'));
+                return frag;
+            });
+            break;
+
+        case 'angle':
+            addGroup(containerEl, 'Winkel', () => {
+                const frag = document.createDocumentFragment();
+                frag.appendChild(makeRow('Typ', selectInput(elem.props.style || 'arc', [
+                    { value: 'arc', label: 'Bogen (Kreisbogen)' },
+                    { value: 'square', label: 'Rechtwinklig (90° Eck)' },
+                ], v => onChangeFn(elem.id, 'style', v))));
+                frag.appendChild(makeRow('Winkel', numberInput(elem.props.arcAngle !== undefined ? elem.props.arcAngle : 90, v => onChangeFn(elem.id, 'arcAngle', v), { min: 5, max: 360, step: 5 }), '°'));
+                frag.appendChild(makeRow('Startwinkel', numberInput(elem.props.startAngle || 0, v => onChangeFn(elem.id, 'startAngle', v), { min: -360, max: 360, step: 5 }), '°'));
+                frag.appendChild(makeRow('Radius', numberInput(elem.props.radius || 35, v => onChangeFn(elem.id, 'radius', v), { min: 10, max: 150, step: 5 }), 'px'));
+                frag.appendChild(makeRow('Pfeile', selectInput(elem.props.arrows || 'both', [
+                    { value: 'both', label: 'Beidseitig (Doppelpfeil)' },
+                    { value: 'end', label: 'Am Ende' },
+                    { value: 'start', label: 'Am Anfang' },
+                    { value: 'dot', label: 'Punkt (Rechter Winkel)' },
+                    { value: 'none', label: 'Keine' },
+                ], v => onChangeFn(elem.id, 'arrows', v))));
+                frag.appendChild(makeRow('Beschr.', textInput(elem.props.label || 'α', v => onChangeFn(elem.id, 'label', v)), null, MATH_LABEL_TOOLTIP));
                 return frag;
             });
             break;
@@ -143,7 +172,7 @@ export function showProperties(elem) {
         case 'label':
             addGroup(containerEl, 'Text', () => {
                 const frag = document.createDocumentFragment();
-                frag.appendChild(makeRow('Text', textInput(elem.props.text || 'A', v => onChangeFn(elem.id, 'text', v))));
+                frag.appendChild(makeRow('Text', textInput(elem.props.text || 'A', v => onChangeFn(elem.id, 'text', v)), null, MATH_LABEL_TOOLTIP));
                 frag.appendChild(makeRow('Größe', numberInput(elem.props.fontSize || 18, v => onChangeFn(elem.id, 'fontSize', v), { min: 8, max: 72, step: 1 }), 'px'));
                 return frag;
             });
@@ -197,13 +226,22 @@ function addGroup(container, title, contentFn) {
     container.appendChild(group);
 }
 
-function makeRow(label, input, unit) {
+const MATH_LABEL_TOOLTIP = 'Mathematische Symbole & Formatierung:\n• Griechisch: \\alpha (α), \\beta (β), \\gamma (γ), \\delta (δ), \\epsilon (ε), \\theta (θ), \\lambda (λ), \\mu (μ), \\pi (π), \\rho (ρ), \\sigma (σ), \\tau (τ), \\phi (φ), \\omega (ω)\n• Große Symbole: \\Delta (Δ), \\Omega (Ω), \\Phi (Φ)\n• Spezialsymbole: \\ell (ℓ), \\cdot (·), \\infty (∞)\n• Tiefgestellt: _0 oder _{abc} (z.B. q_0)\n• Hochgestellt: ^2 oder ^{xyz} (z.B. x^2)';
+
+function makeRow(label, input, unit, infoTooltip) {
     const row = document.createElement('div');
     row.className = 'prop-row';
 
     const lbl = document.createElement('span');
     lbl.className = 'prop-label';
     lbl.textContent = label;
+    if (infoTooltip) {
+        const bubble = document.createElement('span');
+        bubble.className = 'info-bubble';
+        bubble.textContent = '?';
+        bubble.title = infoTooltip;
+        lbl.appendChild(bubble);
+    }
     row.appendChild(lbl);
 
     row.appendChild(input);
@@ -235,11 +273,13 @@ function numberInput(value, onChange, opts = {}) {
     return input;
 }
 
-function textInput(value, onChange) {
+function textInput(value, onChange, tooltip) {
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'prop-input';
     input.value = value;
+    input.title = tooltip || MATH_LABEL_TOOLTIP;
+    input.placeholder = 'z.B. F_1, \\alpha, M';
 
     input.addEventListener('input', () => {
         onChange(input.value);

@@ -256,8 +256,9 @@
         gelenk: { name: 'Gelenk', defaults: { radius: 6, label: '', labelHorizontal: false, labelPos: 'NE' } },
         einzelkraft: { name: 'Einzelkraft', defaults: { magnitude: 70, label: 'F', labelHorizontal: false, labelPos: 'NW' } },
         streckenlast: { name: 'Streckenlast', defaults: { length: 200, startMag: 50, endMag: 50, label: 'q₀', arrowSpacing: 25, distType: 'linear', formula: '50 * sin(PI * x / L)', labelHorizontal: false, labelPos: 'N' } },
-        moment: { name: 'Moment', defaults: { radius: 25, label: 'M', direction: 'cw', labelHorizontal: false, labelPos: 'N' } },
+        moment: { name: 'Moment', defaults: { radius: 25, label: 'M', direction: 'cw', arcAngle: 270, labelHorizontal: false, labelPos: 'N' } },
         dimension: { name: 'Bemaßung', defaults: { length: 200, label: 'a', offset: 8, labelHorizontal: false, labelPos: 'N' } },
+        angle: { name: 'Winkel', defaults: { radius: 35, startAngle: 0, arcAngle: 90, label: 'α', style: 'arc', arrows: 'both', labelHorizontal: false, labelPos: 'outer' } },
         label: { name: 'Text', defaults: { text: 'A', fontSize: 18, labelHorizontal: false } },
         section_cut: { name: 'Schnittlinie', defaults: { length: 80, label: 'A', dir: 'right' } },
         cross_section: { name: 'Querschnitt', defaults: { label: 'A-A', shapes: [{ id: 1, type: 'rectangle', mode: 'solid', x: 0, y: 0, w: 40, h: 60 }] } },
@@ -955,15 +956,16 @@
 
         moment(g, p, rot) {
             const r = p.radius || 25, dir = p.direction || 'cw', hl = 8;
-            const sa = -90, sw = dir === 'cw' ? 270 : -270, ea = sa + sw;
+            const arcDeg = p.arcAngle !== undefined ? p.arcAngle : 270;
+            const sa = -90, sw = dir === 'cw' ? arcDeg : -arcDeg, ea = sa + sw;
             const sr = sa * Math.PI / 180, er = ea * Math.PI / 180;
             const x1 = r * Math.cos(sr), y1 = r * Math.sin(sr);
             const x2 = r * Math.cos(er), y2 = r * Math.sin(er);
             const la = Math.abs(sw) > 180 ? 1 : 0, sf = sw > 0 ? 1 : 0;
             g.appendChild(svgEl('path', { d: 'M ' + x1 + ' ' + y1 + ' A ' + r + ' ' + r + ' 0 ' + la + ' ' + sf + ' ' + x2 + ' ' + y2, fill: 'none', stroke: '#1e293b', 'stroke-width': 2 }));
-            const ta = er + (dir === 'cw' ? -Math.PI / 2 : Math.PI / 2);
-            const ax = x2 + hl * Math.cos(ta + 0.4), ay = y2 + hl * Math.sin(ta + 0.4);
-            const bx = x2 + hl * Math.cos(ta - 0.4), by = y2 + hl * Math.sin(ta - 0.4);
+            const ta = er + (sw > 0 ? Math.PI / 2 : -Math.PI / 2);
+            const ax = x2 - hl * Math.cos(ta + 0.4), ay = y2 - hl * Math.sin(ta + 0.4);
+            const bx = x2 - hl * Math.cos(ta - 0.4), by = y2 - hl * Math.sin(ta - 0.4);
             g.appendChild(svgEl('polygon', { points: x2 + ',' + y2 + ' ' + ax + ',' + ay + ' ' + bx + ',' + by, fill: '#1e293b' }));
             if (p.label) {
                 const dirKey = p.labelPos || 'N';
@@ -984,6 +986,74 @@
                     const t = svgEl('text', { x: 0, y: align.dy, 'text-anchor': align.anchor, 'font-size': 18, 'font-family': 'Inter, sans-serif', 'font-style': 'italic', 'font-weight': '500', fill: '#1e293b' }); renderMathText(t, p.label); lg.appendChild(t); g.appendChild(lg);
                 } else {
                     const t = svgEl('text', { x: lx, y: ly + align.dy, 'text-anchor': align.anchor, 'font-size': 18, 'font-family': 'Inter, sans-serif', 'font-style': 'italic', 'font-weight': '500', fill: '#1e293b' }); renderMathText(t, p.label); g.appendChild(t);
+                }
+            }
+        },
+
+        angle(g, p, rot) {
+            const r = p.radius || 35;
+            const saDeg = p.startAngle || 0;
+            const arcDeg = p.arcAngle !== undefined ? p.arcAngle : 90;
+            const style = p.style || 'arc';
+            const arrows = p.arrows || 'both';
+            const label = p.label || 'α';
+            const hl = 7;
+
+            const sa = saDeg * Math.PI / 180;
+            const ea = (saDeg + arcDeg) * Math.PI / 180;
+
+            if (style === 'square') {
+                const x1 = r * Math.cos(sa), y1 = r * Math.sin(sa);
+                const x2 = r * Math.cos(ea), y2 = r * Math.sin(ea);
+                const cx = x1 + x2, cy = y1 + y2;
+                g.appendChild(svgEl('polyline', { points: x1 + ',' + y1 + ' ' + cx + ',' + cy + ' ' + x2 + ',' + y2, fill: 'none', stroke: '#1e293b', 'stroke-width': 1.5 }));
+                if (arrows === 'dot') {
+                    g.appendChild(svgEl('circle', { cx: cx * 0.5, cy: cy * 0.5, r: 2.5, fill: '#1e293b' }));
+                }
+            } else {
+                const x1 = r * Math.cos(sa), y1 = r * Math.sin(sa);
+                const x2 = r * Math.cos(ea), y2 = r * Math.sin(ea);
+                const la = Math.abs(arcDeg) > 180 ? 1 : 0;
+                const sf = arcDeg > 0 ? 1 : 0;
+                g.appendChild(svgEl('path', { d: 'M ' + x1 + ' ' + y1 + ' A ' + r + ' ' + r + ' 0 ' + la + ' ' + sf + ' ' + x2 + ' ' + y2, fill: 'none', stroke: '#1e293b', 'stroke-width': 1.5 }));
+
+                if (arrows === 'both' || arrows === 'end') {
+                    const taEnd = ea + (arcDeg > 0 ? Math.PI / 2 : -Math.PI / 2);
+                    const ax = x2 - hl * Math.cos(taEnd - 0.35);
+                    const ay = y2 - hl * Math.sin(taEnd - 0.35);
+                    const bx = x2 - hl * Math.cos(taEnd + 0.35);
+                    const by = y2 - hl * Math.sin(taEnd + 0.35);
+                    g.appendChild(svgEl('polygon', { points: x2 + ',' + y2 + ' ' + ax + ',' + ay + ' ' + bx + ',' + by, fill: '#1e293b' }));
+                }
+
+                if (arrows === 'both' || arrows === 'start') {
+                    const taStart = sa + (arcDeg > 0 ? -Math.PI / 2 : Math.PI / 2);
+                    const ax = x1 - hl * Math.cos(taStart - 0.35);
+                    const ay = y1 - hl * Math.sin(taStart - 0.35);
+                    const bx = x1 - hl * Math.cos(taStart + 0.35);
+                    const by = y1 - hl * Math.sin(taStart + 0.35);
+                    g.appendChild(svgEl('polygon', { points: x1 + ',' + y1 + ' ' + ax + ',' + ay + ' ' + bx + ',' + by, fill: '#1e293b' }));
+                }
+
+                if (arrows === 'dot') {
+                    const midRad = (sa + ea) / 2;
+                    g.appendChild(svgEl('circle', { cx: (r * 0.5) * Math.cos(midRad), cy: (r * 0.5) * Math.sin(midRad), r: 2.5, fill: '#1e293b' }));
+                }
+            }
+
+            if (label) {
+                const midRad = (sa + ea) / 2;
+                const labelR = r + 14;
+                const lx = labelR * Math.cos(midRad);
+                const ly = labelR * Math.sin(midRad);
+
+                if (p.labelHorizontal && rot) {
+                    const lg = svgEl('g', { transform: 'translate(' + lx + ',' + ly + ') rotate(' + (-rot) + ')' });
+                    const t = svgEl('text', { x: 0, y: 4, 'text-anchor': 'middle', 'font-size': 16, 'font-family': 'Inter, sans-serif', 'font-style': 'italic', 'font-weight': '500', fill: '#1e293b' });
+                    renderMathText(t, label); lg.appendChild(t); g.appendChild(lg);
+                } else {
+                    const t = svgEl('text', { x: lx, y: ly + 4, 'text-anchor': 'middle', 'font-size': 16, 'font-family': 'Inter, sans-serif', 'font-style': 'italic', 'font-weight': '500', fill: '#1e293b' });
+                    renderMathText(t, label); g.appendChild(t);
                 }
             }
         },
@@ -1315,7 +1385,7 @@
                     const f = document.createDocumentFragment();
                     f.appendChild(makePropRow('Größe', numInput(elem.props.size, function (v) { propsOnChange(elem.id, 'size', v); }, { min: 10, max: 60, step: 2 }), 'px'));
                     f.appendChild(makePropRow('Gelenkradius', numInput(elem.props.radius !== undefined ? elem.props.radius : 3, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 1, max: 20, step: 0.5 }), 'px'));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); })));
+                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
                     f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
                         { value: 'rotate', label: 'Mit Element drehen' },
                         { value: 'horizontal', label: 'Horizontal halten' }
@@ -1341,7 +1411,7 @@
                         { value: 'lines', label: 'Linien (Gleiter)' },
                         { value: 'rollers', label: 'Rollen (Kugeln)' }
                     ], function (v) { propsOnChange(elem.id, 'variant', v); })));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); })));
+                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
                     f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
                         { value: 'rotate', label: 'Mit Element drehen' },
                         { value: 'horizontal', label: 'Horizontal halten' }
@@ -1369,7 +1439,7 @@
                 addPropGroup(propsContainer, 'Gelenk', function () {
                     const f = document.createDocumentFragment();
                     f.appendChild(makePropRow('Radius', numInput(elem.props.radius, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 3, max: 20, step: 1 }), 'px'));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); })));
+                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
                     f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
                         { value: 'rotate', label: 'Mit Element drehen' },
                         { value: 'horizontal', label: 'Horizontal halten' }
@@ -1390,7 +1460,7 @@
                 addPropGroup(propsContainer, 'Kraft', function () {
                     const f = document.createDocumentFragment();
                     f.appendChild(makePropRow('Länge', numInput(elem.props.magnitude, function (v) { propsOnChange(elem.id, 'magnitude', v); }, { min: 20, max: 300, step: 5 }), 'px'));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'F', function (v) { propsOnChange(elem.id, 'label', v); })));
+                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'F', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
                     f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
                         { value: 'rotate', label: 'Mit Element drehen' },
                         { value: 'horizontal', label: 'Horizontal halten' }
@@ -1429,7 +1499,7 @@
                         f.appendChild(makePropRow('Formel', txtInput(elem.props.formula || '50 * sin(PI * x / L)', function (v) { propsOnChange(elem.id, 'formula', v); })));
                     }
                     f.appendChild(makePropRow('Abstand', numInput(elem.props.arrowSpacing || 25, function (v) { propsOnChange(elem.id, 'arrowSpacing', v); }, { min: 10, max: 100, step: 5 }), 'px'));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'q₀', function (v) { propsOnChange(elem.id, 'label', v); })));
+                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'q₀', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
                     f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
                         { value: 'rotate', label: 'Mit Element drehen' },
                         { value: 'horizontal', label: 'Horizontal halten' }
@@ -1450,7 +1520,14 @@
                 addPropGroup(propsContainer, 'Moment', function () {
                     const f = document.createDocumentFragment();
                     f.appendChild(makePropRow('Radius', numInput(elem.props.radius, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 10, max: 80, step: 5 }), 'px'));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'M', function (v) { propsOnChange(elem.id, 'label', v); })));
+                    f.appendChild(makePropRow('Öffnungswinkel', numInput(elem.props.arcAngle !== undefined ? elem.props.arcAngle : 270, function (v) { propsOnChange(elem.id, 'arcAngle', v); }, { min: 10, max: 360, step: 5 }), '°'));
+                    f.appendChild(makePropRow('Vorlagen', selInput(String(elem.props.arcAngle || 270), [
+                        { value: '180', label: '180° (Halbkreis)' },
+                        { value: '270', label: '270° (3/4 Kreis)' },
+                        { value: '90', label: '90° (Viertelkreis)' },
+                        { value: '360', label: '360° (Vollkreis)' }
+                    ], function (v) { propsOnChange(elem.id, 'arcAngle', parseFloat(v)); })));
+                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'M', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
                     f.appendChild(makePropRow('Richtung', selInput(elem.props.direction || 'cw', [
                         { value: 'cw', label: 'Uhrzeigersinn' }, { value: 'ccw', label: 'Gegen Uhrzeigersinn' },
                     ], function (v) { propsOnChange(elem.id, 'direction', v); })));
@@ -1470,11 +1547,35 @@
                     ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
+            case 'angle':
+                addPropGroup(propsContainer, 'Winkel', function () {
+                    const f = document.createDocumentFragment();
+                    f.appendChild(makePropRow('Typ', selInput(elem.props.style || 'arc', [
+                        { value: 'arc', label: 'Bogen (Kreisbogen)' },
+                        { value: 'square', label: 'Rechtwinklig (90° Eck)' }
+                    ], function (v) { propsOnChange(elem.id, 'style', v); })));
+                    f.appendChild(makePropRow('Winkel', numInput(elem.props.arcAngle !== undefined ? elem.props.arcAngle : 90, function (v) { propsOnChange(elem.id, 'arcAngle', v); }, { min: 5, max: 360, step: 5 }), '°'));
+                    f.appendChild(makePropRow('Startwinkel', numInput(elem.props.startAngle || 0, function (v) { propsOnChange(elem.id, 'startAngle', v); }, { min: -360, max: 360, step: 5 }), '°'));
+                    f.appendChild(makePropRow('Radius', numInput(elem.props.radius || 35, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 10, max: 150, step: 5 }), 'px'));
+                    f.appendChild(makePropRow('Pfeile', selInput(elem.props.arrows || 'both', [
+                        { value: 'both', label: 'Beidseitig (Doppelpfeil)' },
+                        { value: 'end', label: 'Am Ende' },
+                        { value: 'start', label: 'Am Anfang' },
+                        { value: 'dot', label: 'Punkt (Rechter Winkel)' },
+                        { value: 'none', label: 'Keine' }
+                    ], function (v) { propsOnChange(elem.id, 'arrows', v); })));
+                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'α', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
+                        { value: 'rotate', label: 'Mit Element drehen' },
+                        { value: 'horizontal', label: 'Horizontal halten' }
+                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    return f;
+                }); break;
             case 'dimension':
                 addPropGroup(propsContainer, 'Bemaßung', function () {
                     const f = document.createDocumentFragment();
                     f.appendChild(makePropRow('Länge', numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 25, step: 25 }), 'px'));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'a', function (v) { propsOnChange(elem.id, 'label', v); })));
+                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'a', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
                     f.appendChild(makePropRow('Offset', numInput(elem.props.offset || 8, function (v) { propsOnChange(elem.id, 'offset', v); }, { min: 2, max: 30, step: 1 }), 'px'));
                     f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
                         { value: 'rotate', label: 'Mit Element drehen' },
@@ -1727,9 +1828,16 @@
         g.appendChild(t); g.appendChild(fn()); c.appendChild(g);
     }
 
-    function makePropRow(label, input, unit) {
+    const MATH_LABEL_TOOLTIP = 'Mathematische Symbole & Formatierung:\n• Griechisch: \\alpha (α), \\beta (β), \\gamma (γ), \\delta (δ), \\epsilon (ε), \\theta (θ), \\lambda (λ), \\mu (μ), \\pi (π), \\rho (ρ), \\sigma (σ), \\tau (τ), \\phi (φ), \\omega (ω)\n• Große Symbole: \\Delta (Δ), \\Omega (Ω), \\Phi (Φ)\n• Spezialsymbole: \\ell (ℓ), \\cdot (·), \\infty (∞)\n• Tiefgestellt: _0 oder _{abc} (z.B. q_0)\n• Hochgestellt: ^2 oder ^{xyz} (z.B. x^2)';
+
+    function makePropRow(label, input, unit, infoTooltip) {
         const r = document.createElement('div'); r.className = 'prop-row';
-        const l = document.createElement('span'); l.className = 'prop-label'; l.textContent = label; r.appendChild(l);
+        const l = document.createElement('span'); l.className = 'prop-label'; l.textContent = label;
+        if (infoTooltip) {
+            const b = document.createElement('span'); b.className = 'info-bubble'; b.textContent = '?'; b.title = infoTooltip;
+            l.appendChild(b);
+        }
+        r.appendChild(l);
         r.appendChild(input);
         if (unit) { const u = document.createElement('span'); u.className = 'prop-unit'; u.textContent = unit; r.appendChild(u); }
         return r;
@@ -1745,8 +1853,10 @@
         return i;
     }
 
-    function txtInput(val, onChange) {
+    function txtInput(val, onChange, tooltip) {
         const i = document.createElement('input'); i.type = 'text'; i.className = 'prop-input'; i.value = val;
+        i.title = tooltip || MATH_LABEL_TOOLTIP;
+        i.placeholder = 'z.B. F_1, \\alpha, M';
         i.addEventListener('input', function () { onChange(i.value); });
         return i;
     }
@@ -1768,7 +1878,7 @@
 
     function exportPNG(svg, elements, scale) {
         scale = scale || 2;
-        const r = buildCleanSVG(svg);
+        const r = buildCleanSVG(svg, 12);
         const canvas = document.createElement('canvas'); canvas.width = r.width * scale; canvas.height = r.height * scale;
         const ctx = canvas.getContext('2d'); ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         const img = new Image();
@@ -1782,10 +1892,11 @@
         img.src = url;
     }
 
-    function buildCleanSVG(svg) {
+    function buildCleanSVG(svg, customPad) {
         const el = svg.querySelector('#elements-layer');
         let bb; try { bb = el.getBBox(); } catch (e) { bb = { x: 0, y: 0, width: 800, height: 600 }; }
-        const pad = 40, vx = bb.x - pad, vy = bb.y - pad, vw = Math.max(bb.width + pad * 2, 200), vh = Math.max(bb.height + pad * 2, 150);
+        const pad = customPad !== undefined ? customPad : 40;
+        const vx = bb.x - pad, vy = bb.y - pad, vw = Math.max(bb.width + pad * 2, 200), vh = Math.max(bb.height + pad * 2, 150);
         const clone = el.cloneNode(true);
         clone.querySelectorAll('.element-group').forEach(function (g) { g.classList.remove('selected'); g.removeAttribute('data-id'); });
         const s = '<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="' + SVG_NS + '" viewBox="' + vx + ' ' + vy + ' ' + vw + ' ' + vh + '" width="' + vw + '" height="' + vh + '">\n  <defs>\n    <filter id="outline" x="-20%" y="-20%" width="140%" height="140%">\n      <feMorphology operator="dilate" radius="1.5" in="SourceAlpha" result="dilated" />\n      <feColorMatrix type="matrix" values="0 0 0 0 0.12   0 0 0 0 0.16   0 0 0 0 0.23  0 0 0 1 0" in="dilated" result="coloredOutline" />\n      <feMerge>\n        <feMergeNode in="coloredOutline" />\n        <feMergeNode in="SourceGraphic" />\n      </feMerge>\n    </filter>\n  </defs>\n  <rect x="' + vx + '" y="' + vy + '" width="' + vw + '" height="' + vh + '" fill="white"/>\n  ' + clone.innerHTML + '\n</svg>';
@@ -2340,6 +2451,18 @@
         var es = document.getElementById('btn-export-svg'); if (es) es.addEventListener('click', function () { exportSVG(appSvg, state.elements); });
         var ep = document.getElementById('btn-export-png'); if (ep) ep.addEventListener('click', function () { exportPNG(appSvg, state.elements); });
         var rnd = document.getElementById('btn-random'); if (rnd) rnd.addEventListener('click', openRandomGeneratorDialog);
+        var btnHelp = document.getElementById('btn-help');
+        var helpModal = document.getElementById('help-modal');
+        var btnCloseHelp = document.getElementById('btn-close-help');
+        if (btnHelp && helpModal) {
+            btnHelp.addEventListener('click', function () { helpModal.style.display = 'flex'; });
+        }
+        if (btnCloseHelp && helpModal) {
+            btnCloseHelp.addEventListener('click', function () { helpModal.style.display = 'none'; });
+        }
+        if (helpModal) {
+            helpModal.addEventListener('click', function (e) { if (e.target === helpModal) helpModal.style.display = 'none'; });
+        }
     }
 
     function setupStatusBar() {
@@ -2482,6 +2605,7 @@
                 streckenlast: 'Streckenlast',
                 moment: 'Moment',
                 dimension: 'Bemaßung',
+                angle: 'Winkel',
                 label: 'Text',
                 line: 'Linie',
                 arrow: 'Pfeil',
@@ -2504,41 +2628,30 @@
             } else if (elem.type === 'bar') {
                 props.push(`L=${p.length}`);
                 props.push(`h=${p.height || 4}`);
-                props.push(`r=${p.radius !== undefined ? p.radius : 4.5}`);
+                if (p.radius !== undefined) props.push(`r=${p.radius}`);
             } else if (elem.type === 'section_cut') {
                 props.push(`L=${p.length || 80}`);
                 props.push(`label="${p.label || 'A'}"`);
                 props.push(`dir="${p.dir || 'right'}"`);
             } else if (elem.type === 'cross_section') {
                 props.push(`label="${p.label || 'A-A'}"`);
-                const shapeLines = (p.shapes || []).map(s => {
-                    let sParts = [];
-                    sParts.push(`type=${s.type}`);
-                    sParts.push(`mode=${s.mode || 'solid'}`);
-                    sParts.push(`x=${s.x || 0}`);
-                    sParts.push(`y=${s.y || 0}`);
-                    if (s.type === 'circle') {
-                        sParts.push(`r=${s.r || 15}`);
-                    } else {
-                        sParts.push(`w=${s.w || 30}`);
-                        sParts.push(`h=${s.h || 30}`);
-                    }
-                    return sParts.join(',');
-                });
-                props.push(`shapes=[${shapeLines.join(' | ')}]`);
+                if (p.shapes && p.shapes.length > 0) {
+                    const shapesStr = p.shapes.map(s => `type=${s.type},mode=${s.mode},x=${s.x},y=${s.y},w=${s.w},h=${s.h},r=${s.r || 15}`).join('|');
+                    props.push(`shapes="[${shapesStr}]"`);
+                }
             } else if (elem.type === 'festlager' || elem.type === 'loslager') {
                 props.push(`size=${p.size}`);
-                props.push(`label="${p.label || ''}"`);
-                props.push(`r=${p.radius !== undefined ? p.radius : 3}`);
+                if (p.label) props.push(`label="${p.label}"`);
+                if (p.radius !== undefined) props.push(`r=${p.radius}`);
                 if (p.labelPos) props.push(`lp="${p.labelPos}"`);
-                if (elem.type === 'loslager') props.push(`variant="${p.variant || 'lines'}"`);
+                if (elem.type === 'loslager' && p.variant) props.push(`variant="${p.variant}"`);
                 if (p.labelHorizontal) props.push('lh=1');
             } else if (elem.type === 'einspannung') {
                 props.push(`wl=${p.wallLength}`);
                 props.push(`ww=${p.wallWidth}`);
             } else if (elem.type === 'gelenk') {
                 props.push(`r=${p.radius}`);
-                props.push(`label="${p.label || ''}"`);
+                if (p.label) props.push(`label="${p.label}"`);
                 if (p.labelPos) props.push(`lp="${p.labelPos}"`);
                 if (p.labelHorizontal) props.push('lh=1');
             } else if (elem.type === 'einzelkraft') {
@@ -2634,6 +2747,7 @@
             'Streckenlast': 'streckenlast',
             'Moment': 'moment',
             'Bemaßung': 'dimension',
+            'Winkel': 'angle',
             'Text': 'label',
             'Linie': 'line',
             'Pfeil': 'arrow',
@@ -2775,6 +2889,7 @@
                 if (parsedProps.lh === '1') props.labelHorizontal = true;
             } else if (type === 'moment') {
                 props.radius = parseFloat(parsedProps.r) || 25;
+                if (parsedProps.arc !== undefined) props.arcAngle = parseFloat(parsedProps.arc);
                 props.label = parsedProps.label || 'M';
                 props.direction = parsedProps.dir || 'cw';
                 props.labelPos = parsedProps.lp || 'N';
@@ -2784,6 +2899,14 @@
                 props.label = parsedProps.label || 'a';
                 props.offset = parseFloat(parsedProps.offset) || 8;
                 props.labelPos = parsedProps.lp || 'N';
+                if (parsedProps.lh === '1') props.labelHorizontal = true;
+            } else if (type === 'angle') {
+                props.radius = parseFloat(parsedProps.r) || 35;
+                props.startAngle = parseFloat(parsedProps.sa) || 0;
+                props.arcAngle = parsedProps.arc !== undefined ? parseFloat(parsedProps.arc) : 90;
+                props.style = parsedProps.style || 'arc';
+                props.arrows = parsedProps.arr || 'both';
+                props.label = parsedProps.label || 'α';
                 if (parsedProps.lh === '1') props.labelHorizontal = true;
             } else if (type === 'label') {
                 props.text = parsedProps.txt || 'A';
