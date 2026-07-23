@@ -181,6 +181,9 @@
     const state = {
         elements: new Map(),
         selectedId: null,
+        selectedIds: new Set(),
+        clipboard: [],
+        pasteCount: 0,
         activeTool: null,
         gridSize: 25,
         showGrid: true,
@@ -260,12 +263,12 @@
         dimension: { name: 'Bemaßung', defaults: { length: 200, label: 'a', offset: 8, labelHorizontal: false, labelPos: 'N' } },
         angle: { name: 'Winkel', defaults: { radius: 35, startAngle: 0, arcAngle: 90, label: 'α', style: 'arc', arrows: 'both', labelHorizontal: false, labelPos: 'outer' } },
         label: { name: 'Text', defaults: { text: 'A', fontSize: 18, labelHorizontal: false } },
-        section_cut: { name: 'Schnittlinie', defaults: { length: 80, label: 'A', dir: 'right' } },
-        cross_section: { name: 'Querschnitt', defaults: { label: 'A-A', shapes: [{ id: 1, type: 'rectangle', mode: 'solid', x: 0, y: 0, w: 40, h: 60 }] } },
+        section_cut: { name: 'Schnittlinie', defaults: { length: 80, label: 'A', dir: 'right', labelHorizontal: false, labelPos: 'N' } },
+        cross_section: { name: 'Querschnitt', defaults: { label: 'A-A', shapes: [{ id: 1, type: 'rectangle', mode: 'solid', x: 0, y: 0, w: 40, h: 60 }], labelHorizontal: false, labelPos: 'S' } },
         line: { name: 'Linie', defaults: { length: 150, strokeWidth: 1.5, style: 'solid' } },
         arrow: { name: 'Pfeil', defaults: { length: 100, strokeWidth: 1.8, style: 'solid', label: '', labelHorizontal: false, labelPos: 'N' } },
-        coord_system_xy: { name: 'Koordinatensystem (x-y)', defaults: { sizeX: 80, sizeY: 80, labelX: 'x', labelY: 'y' } },
-        coord_system_x: { name: 'Koordinatenachse (x)', defaults: { sizeX: 100, labelX: 'x' } },
+        coord_system_xy: { name: 'Koordinatensystem (x-y)', defaults: { sizeX: 80, sizeY: 80, labelX: 'x', labelY: 'y', labelHorizontal: false, labelPos: 'E' } },
+        coord_system_x: { name: 'Koordinatenachse (x)', defaults: { sizeX: 100, labelX: 'x', labelHorizontal: false, labelPos: 'E' } },
     };
 
     function createElementData(type, x, y, rotation, propsOverride, id) {
@@ -594,7 +597,7 @@
             g.appendChild(svgEl('path', { d: d, fill: 'none', stroke: '#e2e8f0', 'stroke-width': h, 'stroke-linecap': 'butt' }));
         },
 
-        section_cut(g, p) {
+        section_cut(g, p, rot) {
             const length = p.length || 80, label = p.label || 'A', dir = p.dir || 'right';
             const hl = 6;
             g.appendChild(svgEl('line', { x1: 0, y1: -length / 2 + 8, x2: 0, y2: length / 2 - 8, stroke: '#1e293b', 'stroke-width': 1, 'stroke-dasharray': '5,2,1,2' }));
@@ -605,15 +608,35 @@
             const arrowDir = dir === 'right' ? 1 : -1;
             g.appendChild(svgEl('line', { x1: arrowTailX, y1: -length / 2, x2: arrowTipX, y2: -length / 2, stroke: '#1e293b', 'stroke-width': 1.8 }));
             g.appendChild(svgEl('polygon', { points: `${arrowTipX},${-length / 2} ${arrowTipX - arrowDir * hl},${-length / 2 - 3.5} ${arrowTipX - arrowDir * hl},${-length / 2 + 3.5}`, fill: '#1e293b' }));
-            const t1 = svgEl('text', { x: arrowTailX - arrowDir * 4, y: -length / 2 + 4, 'font-size': 14, 'font-family': 'Inter, sans-serif', 'font-weight': '700', fill: '#1e293b', 'text-anchor': dir === 'right' ? 'end' : 'start' });
-            t1.textContent = label; g.appendChild(t1);
+
+            const t1Anchor = dir === 'right' ? 'end' : 'start';
+            const t1X = arrowTailX - arrowDir * 4, t1Y = -length / 2 + 4;
+            const { lx: l1x, ly: l1y } = getLabelCoords(p, rot, t1X, t1Y, 0, p.labelPos || 'N', p.labelHorizontal);
+            if (p.labelHorizontal && rot) {
+                const lg = svgEl('g', { transform: 'translate(' + l1x + ',' + l1y + ') rotate(' + (-rot) + ')' });
+                const t1 = svgEl('text', { x: 0, y: 0, 'font-size': 14, 'font-family': 'Inter, sans-serif', 'font-weight': '700', fill: '#1e293b', 'text-anchor': t1Anchor });
+                renderMathText(t1, label); lg.appendChild(t1); g.appendChild(lg);
+            } else {
+                const t1 = svgEl('text', { x: l1x, y: l1y, 'font-size': 14, 'font-family': 'Inter, sans-serif', 'font-weight': '700', fill: '#1e293b', 'text-anchor': t1Anchor });
+                renderMathText(t1, label); g.appendChild(t1);
+            }
+
             g.appendChild(svgEl('line', { x1: arrowTailX, y1: length / 2, x2: arrowTipX, y2: length / 2, stroke: '#1e293b', 'stroke-width': 1.8 }));
             g.appendChild(svgEl('polygon', { points: `${arrowTipX},${length / 2} ${arrowTipX - arrowDir * hl},${length / 2 - 3.5} ${arrowTipX - arrowDir * hl},${length / 2 + 3.5}`, fill: '#1e293b' }));
-            const t2 = svgEl('text', { x: arrowTailX - arrowDir * 4, y: length / 2 + 4, 'font-size': 14, 'font-family': 'Inter, sans-serif', 'font-weight': '700', fill: '#1e293b', 'text-anchor': dir === 'right' ? 'end' : 'start' });
-            t2.textContent = label; g.appendChild(t2);
+
+            const t2X = arrowTailX - arrowDir * 4, t2Y = length / 2 + 4;
+            const { lx: l2x, ly: l2y } = getLabelCoords(p, rot, t2X, t2Y, 0, p.labelPos || 'S', p.labelHorizontal);
+            if (p.labelHorizontal && rot) {
+                const lg = svgEl('g', { transform: 'translate(' + l2x + ',' + l2y + ') rotate(' + (-rot) + ')' });
+                const t2 = svgEl('text', { x: 0, y: 0, 'font-size': 14, 'font-family': 'Inter, sans-serif', 'font-weight': '700', fill: '#1e293b', 'text-anchor': t1Anchor });
+                renderMathText(t2, label); lg.appendChild(t2); g.appendChild(lg);
+            } else {
+                const t2 = svgEl('text', { x: l2x, y: l2y, 'font-size': 14, 'font-family': 'Inter, sans-serif', 'font-weight': '700', fill: '#1e293b', 'text-anchor': t1Anchor });
+                renderMathText(t2, label); g.appendChild(t2);
+            }
         },
 
-        cross_section(g, p) {
+        cross_section(g, p, rot) {
             const label = p.label || 'A-A';
             const shapes = p.shapes || [];
             g.appendChild(svgEl('line', { x1: -50, y1: 0, x2: 50, y2: 0, stroke: '#94a3b8', 'stroke-width': 0.8, 'stroke-dasharray': '3,3' }));
@@ -659,8 +682,17 @@
                     g.appendChild(svgEl('polygon', { points: pts, fill: fill, stroke: stroke, 'stroke-width': strokeWidth, 'stroke-dasharray': strokeDash, 'stroke-linejoin': 'round' }));
                 }
             });
-            const t = svgEl('text', { x: 0, y: 70, 'font-size': 15, 'font-family': 'Inter, sans-serif', 'font-weight': '700', fill: '#1e293b', 'text-anchor': 'middle' });
-            renderMathText(t, 'Schnitt ' + label); g.appendChild(t);
+
+            const dirKey = p.labelPos || 'S';
+            const { lx, ly } = getLabelCoords(p, rot, 0, 70, 0, dirKey, p.labelHorizontal);
+            if (p.labelHorizontal && rot) {
+                const lg = svgEl('g', { transform: 'translate(' + lx + ',' + ly + ') rotate(' + (-rot) + ')' });
+                const t = svgEl('text', { x: 0, y: 0, 'font-size': 15, 'font-family': 'Inter, sans-serif', 'font-weight': '700', fill: '#1e293b', 'text-anchor': 'middle' });
+                renderMathText(t, 'Schnitt ' + label); lg.appendChild(t); g.appendChild(lg);
+            } else {
+                const t = svgEl('text', { x: lx, y: ly, 'font-size': 15, 'font-family': 'Inter, sans-serif', 'font-weight': '700', fill: '#1e293b', 'text-anchor': 'middle' });
+                renderMathText(t, 'Schnitt ' + label); g.appendChild(t);
+            }
         },
 
         bar(g, p) {
@@ -1204,36 +1236,60 @@
             }
         },
 
-        coord_system_xy(g, p) {
+        coord_system_xy(g, p, rot) {
             const sizeX = parseFloat(p.sizeX) || 80;
             const sizeY = parseFloat(p.sizeY) || 80;
             const labelX = p.labelX !== undefined ? p.labelX : 'x';
             const labelY = p.labelY !== undefined ? p.labelY : 'y';
+
             g.appendChild(svgEl('line', { x1: 0, y1: 0, x2: sizeX - 6, y2: 0, stroke: '#1e293b', 'stroke-width': 1.3 }));
             g.appendChild(svgEl('polygon', { points: `${sizeX},0 ${sizeX - 6},-3.5 ${sizeX - 6},3.5`, fill: '#1e293b' }));
             if (labelX) {
-                const t = svgEl('text', { x: sizeX + 8, y: 3, 'font-size': 12, 'font-family': 'Inter, sans-serif', fill: '#1e293b' });
-                renderMathText(t, labelX);
-                g.appendChild(t);
+                const dirKeyX = p.labelPos || 'E';
+                const { lx, ly } = getLabelCoords(p, rot, sizeX + 8, 3, 0, dirKeyX, p.labelHorizontal);
+                if (p.labelHorizontal && rot) {
+                    const lg = svgEl('g', { transform: 'translate(' + lx + ',' + ly + ') rotate(' + (-rot) + ')' });
+                    const t = svgEl('text', { x: 0, y: 0, 'font-size': 12, 'font-family': 'Inter, sans-serif', fill: '#1e293b' });
+                    renderMathText(t, labelX); lg.appendChild(t); g.appendChild(lg);
+                } else {
+                    const t = svgEl('text', { x: lx, y: ly, 'font-size': 12, 'font-family': 'Inter, sans-serif', fill: '#1e293b' });
+                    renderMathText(t, labelX); g.appendChild(t);
+                }
             }
+
             g.appendChild(svgEl('line', { x1: 0, y1: 0, x2: 0, y2: -(sizeY - 6), stroke: '#1e293b', 'stroke-width': 1.3 }));
             g.appendChild(svgEl('polygon', { points: `0,-${sizeY} -3.5,-${sizeY - 6} 3.5,-${sizeY - 6}`, fill: '#1e293b' }));
             if (labelY) {
-                const t = svgEl('text', { x: 0, y: -sizeY - 8, 'text-anchor': 'middle', 'font-size': 12, 'font-family': 'Inter, sans-serif', fill: '#1e293b' });
-                renderMathText(t, labelY);
-                g.appendChild(t);
+                const dirKeyY = p.labelPos || 'N';
+                const { lx, ly } = getLabelCoords(p, rot, 0, -sizeY - 8, 0, dirKeyY, p.labelHorizontal);
+                if (p.labelHorizontal && rot) {
+                    const lg = svgEl('g', { transform: 'translate(' + lx + ',' + ly + ') rotate(' + (-rot) + ')' });
+                    const t = svgEl('text', { x: 0, y: 0, 'text-anchor': 'middle', 'font-size': 12, 'font-family': 'Inter, sans-serif', fill: '#1e293b' });
+                    renderMathText(t, labelY); lg.appendChild(t); g.appendChild(lg);
+                } else {
+                    const t = svgEl('text', { x: lx, y: ly, 'text-anchor': 'middle', 'font-size': 12, 'font-family': 'Inter, sans-serif', fill: '#1e293b' });
+                    renderMathText(t, labelY); g.appendChild(t);
+                }
             }
         },
 
-        coord_system_x(g, p) {
+        coord_system_x(g, p, rot) {
             const sizeX = parseFloat(p.sizeX) || 100;
             const labelX = p.labelX !== undefined ? p.labelX : 'x';
+
             g.appendChild(svgEl('line', { x1: 0, y1: 0, x2: sizeX - 6, y2: 0, stroke: '#1e293b', 'stroke-width': 1.3 }));
             g.appendChild(svgEl('polygon', { points: `${sizeX},0 ${sizeX - 6},-3.5 ${sizeX - 6},3.5`, fill: '#1e293b' }));
             if (labelX) {
-                const t = svgEl('text', { x: sizeX + 8, y: 3, 'font-size': 12, 'font-family': 'Inter, sans-serif', fill: '#1e293b' });
-                renderMathText(t, labelX);
-                g.appendChild(t);
+                const dirKey = p.labelPos || 'E';
+                const { lx, ly } = getLabelCoords(p, rot, sizeX + 8, 3, 0, dirKey, p.labelHorizontal);
+                if (p.labelHorizontal && rot) {
+                    const lg = svgEl('g', { transform: 'translate(' + lx + ',' + ly + ') rotate(' + (-rot) + ')' });
+                    const t = svgEl('text', { x: 0, y: 0, 'font-size': 12, 'font-family': 'Inter, sans-serif', fill: '#1e293b' });
+                    renderMathText(t, labelX); lg.appendChild(t); g.appendChild(lg);
+                } else {
+                    const t = svgEl('text', { x: lx, y: ly, 'font-size': 12, 'font-family': 'Inter, sans-serif', fill: '#1e293b' });
+                    renderMathText(t, labelX); g.appendChild(t);
+                }
             }
         },
     };
@@ -1608,17 +1664,45 @@
                 addPropGroup(propsContainer, 'Schnittlinie', function () {
                     const f = document.createDocumentFragment();
                     f.appendChild(makePropRow('Länge', numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 20, max: 200, step: 5 }), 'px'));
-                    f.appendChild(makePropRow('Bez.', txtInput(elem.props.label || 'A', function (v) { propsOnChange(elem.id, 'label', v); })));
+                    f.appendChild(makePropRow('Bez.', txtInput(elem.props.label || 'A', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
                     f.appendChild(makePropRow('Richtung', selInput(elem.props.dir || 'right', [
                         { value: 'right', label: 'Rechts (►)' },
                         { value: 'left', label: 'Links (◄)' }
                     ], function (v) { propsOnChange(elem.id, 'dir', v); })));
+                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
+                        { value: 'rotate', label: 'Mit Element drehen' },
+                        { value: 'horizontal', label: 'Horizontal halten' }
+                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'N', [
+                        { value: 'NW', label: 'Nordwest' },
+                        { value: 'N', label: 'Norden' },
+                        { value: 'NE', label: 'Nordost' },
+                        { value: 'E', label: 'Osten' },
+                        { value: 'SE', label: 'Südost' },
+                        { value: 'S', label: 'Süden' },
+                        { value: 'SW', label: 'Südwest' },
+                        { value: 'W', label: 'Westen' }
+                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
             case 'cross_section':
                 addPropGroup(propsContainer, 'Querschnitts-Zeichnung', function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Titel', txtInput(elem.props.label || 'A-A', function (v) { propsOnChange(elem.id, 'label', v); })));
+                    f.appendChild(makePropRow('Titel', txtInput(elem.props.label || 'A-A', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
+                        { value: 'rotate', label: 'Mit Element drehen' },
+                        { value: 'horizontal', label: 'Horizontal halten' }
+                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'S', [
+                        { value: 'NW', label: 'Nordwest' },
+                        { value: 'N', label: 'Norden' },
+                        { value: 'NE', label: 'Nordost' },
+                        { value: 'E', label: 'Osten' },
+                        { value: 'SE', label: 'Südost' },
+                        { value: 'S', label: 'Süden' },
+                        { value: 'SW', label: 'Südwest' },
+                        { value: 'W', label: 'Westen' }
+                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     const listTitle = document.createElement('div');
                     listTitle.className = 'prop-group-title';
                     listTitle.style.marginTop = '12px';
@@ -1723,7 +1807,7 @@
                         f.appendChild(box);
                     });
                     const addBtn = document.createElement('button');
-                    addBtn.className = 'prop-btn';
+                    addBtn.className = 'prop-btn-secondary';
                     addBtn.style.width = '100%';
                     addBtn.style.marginTop = '8px';
                     addBtn.style.marginBottom = '12px';
@@ -1781,15 +1865,43 @@
                     const f = document.createDocumentFragment();
                     f.appendChild(makePropRow('Länge X', numInput(elem.props.sizeX || 80, function (v) { propsOnChange(elem.id, 'sizeX', v); }, { min: 10, step: 10 }), 'px'));
                     f.appendChild(makePropRow('Länge Y', numInput(elem.props.sizeY || 80, function (v) { propsOnChange(elem.id, 'sizeY', v); }, { min: 10, step: 10 }), 'px'));
-                    f.appendChild(makePropRow('Label X', txtInput(elem.props.labelX !== undefined ? elem.props.labelX : 'x', function (v) { propsOnChange(elem.id, 'labelX', v); })));
-                    f.appendChild(makePropRow('Label Y', txtInput(elem.props.labelY !== undefined ? elem.props.labelY : 'y', function (v) { propsOnChange(elem.id, 'labelY', v); })));
+                    f.appendChild(makePropRow('Label X', txtInput(elem.props.labelX !== undefined ? elem.props.labelX : 'x', function (v) { propsOnChange(elem.id, 'labelX', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow('Label Y', txtInput(elem.props.labelY !== undefined ? elem.props.labelY : 'y', function (v) { propsOnChange(elem.id, 'labelY', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
+                        { value: 'rotate', label: 'Mit Element drehen' },
+                        { value: 'horizontal', label: 'Horizontal halten' }
+                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'E', [
+                        { value: 'NW', label: 'Nordwest' },
+                        { value: 'N', label: 'Norden' },
+                        { value: 'NE', label: 'Nordost' },
+                        { value: 'E', label: 'Osten' },
+                        { value: 'SE', label: 'Südost' },
+                        { value: 'S', label: 'Süden' },
+                        { value: 'SW', label: 'Südwest' },
+                        { value: 'W', label: 'Westen' }
+                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
             case 'coord_system_x':
                 addPropGroup(propsContainer, 'Koordinatenachse (x)', function () {
                     const f = document.createDocumentFragment();
                     f.appendChild(makePropRow('Länge', numInput(elem.props.sizeX || 100, function (v) { propsOnChange(elem.id, 'sizeX', v); }, { min: 10, step: 10 }), 'px'));
-                    f.appendChild(makePropRow('Label', txtInput(elem.props.labelX !== undefined ? elem.props.labelX : 'x', function (v) { propsOnChange(elem.id, 'labelX', v); })));
+                    f.appendChild(makePropRow('Label', txtInput(elem.props.labelX !== undefined ? elem.props.labelX : 'x', function (v) { propsOnChange(elem.id, 'labelX', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
+                        { value: 'rotate', label: 'Mit Element drehen' },
+                        { value: 'horizontal', label: 'Horizontal halten' }
+                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'E', [
+                        { value: 'NW', label: 'Nordwest' },
+                        { value: 'N', label: 'Norden' },
+                        { value: 'NE', label: 'Nordost' },
+                        { value: 'E', label: 'Osten' },
+                        { value: 'SE', label: 'Südost' },
+                        { value: 'S', label: 'Süden' },
+                        { value: 'SW', label: 'Südwest' },
+                        { value: 'W', label: 'Westen' }
+                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
         }
@@ -1798,6 +1910,35 @@
         del.className = 'prop-btn-danger';
         del.textContent = '✕ Element löschen';
         del.addEventListener('click', function () { if (propsOnDelete) propsOnDelete(elem.id); });
+        propsContainer.appendChild(del);
+    }
+
+    function showMultiProperties(count) {
+        if (!propsContainer) return;
+        while (propsContainer.firstChild) propsContainer.removeChild(propsContainer.firstChild);
+
+        var badge = document.createElement('div');
+        badge.className = 'prop-type-badge';
+        badge.textContent = count + ' Elemente ausgewählt';
+        propsContainer.appendChild(badge);
+
+        var group = document.createElement('div');
+        group.className = 'prop-group';
+        var t = document.createElement('div');
+        t.className = 'prop-group-title';
+        t.textContent = 'Mehrfachauswahl';
+        group.appendChild(t);
+        var info = document.createElement('p');
+        info.className = 'hint-text';
+        info.style.marginTop = '6px';
+        info.textContent = 'Nutzen Sie Strg+C & Strg+V zum Kopieren/Einfügen oder ziehen Sie die Elemente gemeinsam.';
+        group.appendChild(info);
+        propsContainer.appendChild(group);
+
+        var del = document.createElement('button');
+        del.className = 'prop-btn-danger';
+        del.textContent = '✕ ' + count + ' Elemente löschen';
+        del.addEventListener('click', function () { handleDeleteSelected(); });
         propsContainer.appendChild(del);
     }
 
@@ -1914,9 +2055,9 @@
        ════════════════════════════════════════════════════ */
 
     let intSvg = null, intElemLayer = null, intGhostLayer = null, intUiLayer = null, intCallbacks = null;
-    let isDragging = false, isRotating = false, isPanning = false;
-    let dragStartSVG = null, dragStartElemPos = null, rotateStartAngle = null, rotateStartElemAngle = null;
-    let panStartScreen = null, ghostElem = null;
+    let isDragging = false, isRotating = false, isPanning = false, isMarquee = false;
+    let dragStartSVG = null, dragStartElemPositions = null, rotateStartAngle = null, rotateStartElemAngle = null;
+    let panStartScreen = null, ghostElem = null, marqueeStart = null, marqueeRect = null;
 
     function initInteractions(svg, cbs) {
         intSvg = svg; intElemLayer = svg.querySelector('#elements-layer');
@@ -1950,37 +2091,95 @@
         if (go) { while (go.firstChild) go.removeChild(go.firstChild); }
     }
 
-    function updateSelectionUI() {
-        while (intUiLayer && intUiLayer.firstChild) intUiLayer.removeChild(intUiLayer.firstChild);
-        if (!state.selectedId) return;
-        const elem = state.elements.get(state.selectedId);
-        if (!elem || !elem.svgGroup) return;
-        let bb; try { bb = elem.svgGroup.getBBox(); } catch (e) { return; }
-        const pad = 6, bx = bb.x - pad, by = bb.y - pad, bw = bb.width + pad * 2, bh = bb.height + pad * 2;
-        const ug = document.createElementNS(SVG_NS, 'g');
-        ug.setAttribute('transform', 'translate(' + elem.x + ', ' + elem.y + ') rotate(' + (elem.rotation || 0) + ')');
-        ug.style.pointerEvents = 'none';
-        const sr = document.createElementNS(SVG_NS, 'rect');
-        sr.setAttribute('x', bx); sr.setAttribute('y', by); sr.setAttribute('width', bw); sr.setAttribute('height', bh);
-        sr.setAttribute('class', 'selection-box'); ug.appendChild(sr);
-        const hd = 25, hx = bx + bw / 2, hy = by - hd;
-        const hl = document.createElementNS(SVG_NS, 'line');
-        hl.setAttribute('x1', hx); hl.setAttribute('y1', by); hl.setAttribute('x2', hx); hl.setAttribute('y2', hy);
-        hl.setAttribute('class', 'rotation-handle-line'); ug.appendChild(hl);
-        const hc = document.createElementNS(SVG_NS, 'circle');
-        hc.setAttribute('cx', hx); hc.setAttribute('cy', hy); hc.setAttribute('r', 6);
-        hc.setAttribute('class', 'rotation-handle-circle'); hc.style.pointerEvents = 'all'; hc.style.cursor = 'grab';
-        hc.addEventListener('mousedown', function (e) {
-            e.stopPropagation(); isRotating = true;
-            const sp = screenToSVG(e.clientX, e.clientY);
-            rotateStartAngle = Math.atan2(sp.y - elem.y, sp.x - elem.x);
-            rotateStartElemAngle = elem.rotation || 0;
-            intSvg.style.cursor = 'grabbing';
-        });
-        ug.appendChild(hc); intUiLayer.appendChild(ug);
+    function createMarqueeRect(x, y) {
+        if (!intUiLayer) return;
+        removeMarqueeRect();
+        marqueeRect = document.createElementNS(SVG_NS, 'rect');
+        marqueeRect.setAttribute('class', 'selection-marquee');
+        marqueeRect.setAttribute('x', x);
+        marqueeRect.setAttribute('y', y);
+        marqueeRect.setAttribute('width', 0);
+        marqueeRect.setAttribute('height', 0);
+        intUiLayer.appendChild(marqueeRect);
     }
 
-    function clearInteractionState() { isDragging = false; isRotating = false; clearGhost(); }
+    function updateMarqueeRect(start, current) {
+        if (!marqueeRect) return;
+        const x = Math.min(start.x, current.x);
+        const y = Math.min(start.y, current.y);
+        const w = Math.abs(current.x - start.x);
+        const h = Math.abs(current.y - start.y);
+        marqueeRect.setAttribute('x', x);
+        marqueeRect.setAttribute('y', y);
+        marqueeRect.setAttribute('width', w);
+        marqueeRect.setAttribute('height', h);
+    }
+
+    function removeMarqueeRect() {
+        if (marqueeRect) { marqueeRect.remove(); marqueeRect = null; }
+    }
+
+    function getMarqueeBounds() {
+        if (!marqueeRect) return null;
+        return {
+            x: parseFloat(marqueeRect.getAttribute('x')),
+            y: parseFloat(marqueeRect.getAttribute('y')),
+            w: parseFloat(marqueeRect.getAttribute('width')),
+            h: parseFloat(marqueeRect.getAttribute('height'))
+        };
+    }
+
+    function findElementsInBounds(box) {
+        const result = [];
+        for (const [id, elem] of state.elements) {
+            if (!elem.svgGroup) continue;
+            let bb; try { bb = elem.svgGroup.getBBox(); } catch (e) { continue; }
+            const ex = elem.x + bb.x, ey = elem.y + bb.y, ew = bb.width, eh = bb.height;
+            if (ex < box.x + box.w && ex + ew > box.x && ey < box.y + box.h && ey + eh > box.y) {
+                result.push(id);
+            }
+        }
+        return result;
+    }
+
+    function updateSelectionUI() {
+        while (intUiLayer && intUiLayer.firstChild) intUiLayer.removeChild(intUiLayer.firstChild);
+        if (state.selectedIds.size === 0) return;
+
+        for (const id of state.selectedIds) {
+            const elem = state.elements.get(id);
+            if (!elem || !elem.svgGroup) continue;
+            let bb; try { bb = elem.svgGroup.getBBox(); } catch (e) { continue; }
+            const pad = 6, bx = bb.x - pad, by = bb.y - pad, bw = bb.width + pad * 2, bh = bb.height + pad * 2;
+            const ug = document.createElementNS(SVG_NS, 'g');
+            ug.setAttribute('transform', 'translate(' + elem.x + ', ' + elem.y + ') rotate(' + (elem.rotation || 0) + ')');
+            ug.style.pointerEvents = 'none';
+            const sr = document.createElementNS(SVG_NS, 'rect');
+            sr.setAttribute('x', bx); sr.setAttribute('y', by); sr.setAttribute('width', bw); sr.setAttribute('height', bh);
+            sr.setAttribute('class', 'selection-box'); ug.appendChild(sr);
+
+            if (state.selectedIds.size === 1) {
+                const hd = 25, hx = bx + bw / 2, hy = by - hd;
+                const hl = document.createElementNS(SVG_NS, 'line');
+                hl.setAttribute('x1', hx); hl.setAttribute('y1', by); hl.setAttribute('x2', hx); hl.setAttribute('y2', hy);
+                hl.setAttribute('class', 'rotation-handle-line'); ug.appendChild(hl);
+                const hc = document.createElementNS(SVG_NS, 'circle');
+                hc.setAttribute('cx', hx); hc.setAttribute('cy', hy); hc.setAttribute('r', 6);
+                hc.setAttribute('class', 'rotation-handle-circle'); hc.style.pointerEvents = 'all'; hc.style.cursor = 'grab';
+                hc.addEventListener('mousedown', function (e) {
+                    e.stopPropagation(); isRotating = true;
+                    const sp = screenToSVG(e.clientX, e.clientY);
+                    rotateStartAngle = Math.atan2(sp.y - elem.y, sp.x - elem.x);
+                    rotateStartElemAngle = elem.rotation || 0;
+                    intSvg.style.cursor = 'grabbing';
+                });
+                ug.appendChild(hc);
+            }
+            intUiLayer.appendChild(ug);
+        }
+    }
+
+    function clearInteractionState() { isDragging = false; isRotating = false; isMarquee = false; clearGhost(); removeMarqueeRect(); }
 
     function findElementGroupAt(target) {
         let c = target;
@@ -2001,14 +2200,32 @@
             return;
         }
         const cg = findElementGroupAt(e.target);
+        const isMultiKey = e.shiftKey || e.ctrlKey || e.metaKey;
+
         if (cg) {
             const id = cg.getAttribute('data-id');
-            if (intCallbacks.onSelectElement) intCallbacks.onSelectElement(id);
-            isDragging = true; const elem = state.elements.get(id);
-            if (elem) { dragStartSVG = sp; dragStartElemPos = { x: elem.x, y: elem.y }; }
+            if (isMultiKey) {
+                if (intCallbacks.onToggleSelectElement) intCallbacks.onToggleSelectElement(id);
+            } else {
+                if (!state.selectedIds.has(id)) {
+                    if (intCallbacks.onSelectElement) intCallbacks.onSelectElement(id);
+                }
+            }
+            isDragging = true;
+            dragStartSVG = sp;
+            dragStartElemPositions = new Map();
+            for (const selId of state.selectedIds) {
+                const el = state.elements.get(selId);
+                if (el) dragStartElemPositions.set(selId, { x: el.x, y: el.y });
+            }
             intSvg.parentElement.classList.add('dragging');
         } else {
-            if (intCallbacks.onSelectElement) intCallbacks.onSelectElement(null);
+            if (!isMultiKey) {
+                if (intCallbacks.onSelectElement) intCallbacks.onSelectElement(null);
+            }
+            isMarquee = true;
+            marqueeStart = sp;
+            createMarqueeRect(sp.x, sp.y);
         }
     }
 
@@ -2022,6 +2239,10 @@
             applyPan(-(e.clientX - panStartScreen.x) * scx, -(e.clientY - panStartScreen.y) * scy);
             panStartScreen = { x: e.clientX, y: e.clientY }; return;
         }
+        if (isMarquee && marqueeStart) {
+            updateMarqueeRect(marqueeStart, sp);
+            return;
+        }
         if (isRotating && state.selectedId) {
             const elem = state.elements.get(state.selectedId);
             if (elem) {
@@ -2032,22 +2253,46 @@
             }
             return;
         }
-        if (isDragging && state.selectedId && dragStartSVG) {
-            let nx = dragStartElemPos.x + sp.x - dragStartSVG.x, ny = dragStartElemPos.y + sp.y - dragStartSVG.y;
-            if (state.snapEnabled) { nx = snapToGrid(nx); ny = snapToGrid(ny); }
-            if (intCallbacks.onMoveElement) intCallbacks.onMoveElement(state.selectedId, nx, ny);
+        if (isDragging && dragStartSVG && dragStartElemPositions) {
+            const dx = sp.x - dragStartSVG.x, dy = sp.y - dragStartSVG.y;
+            for (const [selId, startPos] of dragStartElemPositions) {
+                let nx = startPos.x + dx, ny = startPos.y + dy;
+                if (state.snapEnabled) { nx = snapToGrid(nx); ny = snapToGrid(ny); }
+                if (intCallbacks.onMoveElement) intCallbacks.onMoveElement(selId, nx, ny);
+            }
             return;
         }
         if (state.activeTool && state.activeTool !== 'pointer') updateGhost(sp.x, sp.y);
     }
 
-    function onMouseUp() {
+    function onMouseUp(e) {
         if (isPanning) { isPanning = false; intSvg.parentElement.classList.remove('panning'); return; }
+        if (isMarquee) {
+            isMarquee = false;
+            const box = getMarqueeBounds();
+            removeMarqueeRect();
+            if (box && (box.w > 3 || box.h > 3)) {
+                const found = findElementsInBounds(box);
+                const isMultiKey = e && (e.shiftKey || e.ctrlKey || e.metaKey);
+                if (isMultiKey) {
+                    const combined = new Set(state.selectedIds);
+                    found.forEach(id => combined.add(id));
+                    if (intCallbacks.onSelectElements) intCallbacks.onSelectElements(Array.from(combined));
+                } else {
+                    if (intCallbacks.onSelectElements) intCallbacks.onSelectElements(found);
+                }
+            }
+            return;
+        }
         if (isRotating) { isRotating = false; intSvg.style.cursor = ''; if (intCallbacks.onMoveEnd) intCallbacks.onMoveEnd(); return; }
         if (isDragging) { isDragging = false; intSvg.parentElement.classList.remove('dragging'); if (intCallbacks.onMoveEnd) intCallbacks.onMoveEnd(); return; }
     }
 
-    function onMouseLeave() { clearGhost(); if (isPanning) { isPanning = false; intSvg.parentElement.classList.remove('panning'); } }
+    function onMouseLeave() {
+        clearGhost();
+        if (isMarquee) { isMarquee = false; removeMarqueeRect(); }
+        if (isPanning) { isPanning = false; intSvg.parentElement.classList.remove('panning'); }
+    }
 
     function onWheel(e) {
         e.preventDefault(); applyZoom(e.deltaY < 0 ? 1 : -1, e.clientX, e.clientY);
@@ -2073,6 +2318,8 @@
         initInteractions(appSvg, {
             onPlaceElement: handlePlaceElement,
             onSelectElement: handleSelectElement,
+            onToggleSelectElement: function (id) { handleSelectElement(id, true); },
+            onSelectElements: function (ids) { setSelectedIds(ids); },
             onMoveElement: handleMoveElement,
             onRotateElement: handleRotateElement,
             onDeleteSelected: handleDeleteSelected,
@@ -2475,8 +2722,12 @@
 
     function updateStatusBar() {
         updateAllBeams();
-        var e = document.getElementById('status-elements'); if (e) e.textContent = state.elements.size + ' Element' + (state.elements.size !== 1 ? 'e' : '');
-        var d = document.getElementById('btn-delete'); if (d) d.disabled = !state.selectedId;
+        var e = document.getElementById('status-elements');
+        if (e) {
+            var selCount = state.selectedIds.size;
+            e.textContent = state.elements.size + ' Element' + (state.elements.size !== 1 ? 'e' : '') + (selCount > 0 ? ' (' + selCount + ' ausgewählt)' : '');
+        }
+        var d = document.getElementById('btn-delete'); if (d) d.disabled = state.selectedIds.size === 0;
         updateUndoRedoButtons();
         updateStateCode();
     }
@@ -2490,12 +2741,17 @@
     function setupKeyboard() {
         document.addEventListener('keydown', function (e) {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+            const isCtrl = e.ctrlKey || e.metaKey;
+            const key = e.key.toLowerCase();
+
             if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); handleDeleteSelected(); return; }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return; }
+            if (isCtrl && key === 'c') { e.preventDefault(); copySelected(); return; }
+            if (isCtrl && key === 'v') { e.preventDefault(); pasteClipboard(); return; }
+            if (isCtrl && key === 'd') { e.preventDefault(); duplicateSelected(); return; }
+            if (isCtrl && key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
+            if (isCtrl && (key === 'y' || (key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return; }
             if (e.key === 'Escape') { setActiveTool(null); handleSelectElement(null); return; }
-            if (e.key === 'v' || e.key === 'V') { setActiveTool(null); return; }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'd') { e.preventDefault(); duplicateSelected(); return; }
+            if (key === 'v' && !isCtrl) { setActiveTool(null); return; }
         });
     }
 
@@ -2507,12 +2763,49 @@
         setActiveTool(null); updateStatusBar(); return id;
     }
 
-    function handleSelectElement(id) {
-        if (state.selectedId) { var old = state.elements.get(state.selectedId); if (old && old.svgGroup) old.svgGroup.classList.remove('selected'); }
-        state.selectedId = id;
-        if (id) { var elem = state.elements.get(id); if (elem && elem.svgGroup) elem.svgGroup.classList.add('selected'); showProperties(elem); }
-        else hideProperties();
-        updateSelectionUI(); updateStatusBar();
+    function setSelectedIds(ids) {
+        ids = ids || [];
+        for (const [, elem] of state.elements) {
+            if (elem.svgGroup) elem.svgGroup.classList.remove('selected');
+        }
+
+        const validIds = ids.filter(id => state.elements.has(id));
+        state.selectedIds = new Set(validIds);
+
+        if (state.selectedIds.size === 1) {
+            state.selectedId = Array.from(state.selectedIds)[0];
+            const elem = state.elements.get(state.selectedId);
+            if (elem && elem.svgGroup) elem.svgGroup.classList.add('selected');
+            showProperties(elem);
+        } else if (state.selectedIds.size > 1) {
+            state.selectedId = null;
+            for (const id of state.selectedIds) {
+                const elem = state.elements.get(id);
+                if (elem && elem.svgGroup) elem.svgGroup.classList.add('selected');
+            }
+            showMultiProperties(state.selectedIds.size);
+        } else {
+            state.selectedId = null;
+            hideProperties();
+        }
+
+        updateSelectionUI();
+        updateStatusBar();
+    }
+
+    function handleSelectElement(id, toggleMulti) {
+        if (!id) {
+            setSelectedIds([]);
+            return;
+        }
+        if (toggleMulti) {
+            const next = new Set(state.selectedIds);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            setSelectedIds(Array.from(next));
+        } else {
+            setSelectedIds([id]);
+        }
     }
 
     function handleMoveElement(id, x, y) {
@@ -2531,13 +2824,77 @@
         updateStatusBar();
     }
 
-    function handleDeleteSelected() { if (!state.selectedId) return; handleDeleteElement(state.selectedId); }
+    function copySelected() {
+        const ids = Array.from(state.selectedIds);
+        if (ids.length === 0 && state.selectedId) ids.push(state.selectedId);
+        if (ids.length === 0) return;
+
+        state.clipboard = ids.map(id => {
+            const elem = state.elements.get(id);
+            if (!elem) return null;
+            return {
+                type: elem.type,
+                x: elem.x,
+                y: elem.y,
+                rotation: elem.rotation || 0,
+                props: JSON.parse(JSON.stringify(elem.props))
+            };
+        }).filter(Boolean);
+
+        state.pasteCount = 0;
+        updateStatusBar();
+    }
+
+    function pasteClipboard() {
+        if (!state.clipboard || state.clipboard.length === 0) return;
+        saveSnapshot();
+
+        state.pasteCount++;
+        const offset = (state.gridSize || 25) * state.pasteCount;
+        const newIds = [];
+
+        for (const item of state.clipboard) {
+            const id = generateId();
+            const d = createElementData(item.type, item.x + offset, item.y + offset, item.rotation, Object.assign({}, item.props));
+            d.id = id;
+            const g = renderElement(d);
+            appendElementToDOM(d, g);
+            state.elements.set(id, d);
+            newIds.push(id);
+        }
+
+        setSelectedIds(newIds);
+        updateUndoRedoButtons();
+        updateStatusBar();
+    }
+
+    function duplicateSelected() {
+        copySelected();
+        pasteClipboard();
+    }
+
+    function handleDeleteSelected() {
+        const ids = Array.from(state.selectedIds);
+        if (ids.length === 0 && state.selectedId) ids.push(state.selectedId);
+        if (ids.length === 0) return;
+
+        saveSnapshot();
+        for (const id of ids) {
+            const elem = state.elements.get(id);
+            if (elem && elem.svgGroup) elem.svgGroup.remove();
+            state.elements.delete(id);
+        }
+        setSelectedIds([]);
+        updateUndoRedoButtons();
+        updateStatusBar();
+    }
 
     function handleDeleteElement(id) {
         saveSnapshot();
         var elem = state.elements.get(id); if (elem && elem.svgGroup) elem.svgGroup.remove();
         state.elements.delete(id);
-        if (state.selectedId === id) { state.selectedId = null; hideProperties(); updateSelectionUI(); }
+        state.selectedIds.delete(id);
+        setSelectedIds(Array.from(state.selectedIds));
         updateStatusBar();
     }
 
@@ -2549,16 +2906,6 @@
         else { saveSnapshot(); elem.props[propName] = value; }
         updateElementSVG(elem); updateSelectionUI(); updateUndoRedoButtons();
         updateStatusBar();
-    }
-
-    function duplicateSelected() {
-        if (!state.selectedId) return;
-        var elem = state.elements.get(state.selectedId); if (!elem) return;
-        saveSnapshot();
-        var off = state.gridSize || 25, id = generateId();
-        var d = createElementData(elem.type, elem.x + off, elem.y + off, elem.rotation, Object.assign({}, elem.props)); d.id = id;
-        var g = renderElement(d); appendElementToDOM(d, g);
-        state.elements.set(id, d); handleSelectElement(id); updateStatusBar();
     }
 
     function undo() {
@@ -2584,7 +2931,8 @@
             var n = parseInt(data.id.replace('elem_', ''), 10);
             if (!isNaN(n) && n >= state.nextId) state.nextId = n + 1;
         }
-        state.selectedId = null; hideProperties(); updateSelectionUI(); updateStatusBar();
+        setSelectedIds([]);
+        updateUndoRedoButtons(); updateStatusBar();
     }
 
     function serializeStateToDSL() {
@@ -2633,8 +2981,12 @@
                 props.push(`L=${p.length || 80}`);
                 props.push(`label="${p.label || 'A'}"`);
                 props.push(`dir="${p.dir || 'right'}"`);
+                if (p.labelPos) props.push(`lp="${p.labelPos}"`);
+                if (p.labelHorizontal) props.push('lh=1');
             } else if (elem.type === 'cross_section') {
                 props.push(`label="${p.label || 'A-A'}"`);
+                if (p.labelPos) props.push(`lp="${p.labelPos}"`);
+                if (p.labelHorizontal) props.push('lh=1');
                 if (p.shapes && p.shapes.length > 0) {
                     const shapesStr = p.shapes.map(s => `type=${s.type},mode=${s.mode},x=${s.x},y=${s.y},w=${s.w},h=${s.h},r=${s.r || 15}`).join('|');
                     props.push(`shapes="[${shapesStr}]"`);
@@ -2701,9 +3053,13 @@
                 props.push(`sy=${p.sizeY || 80}`);
                 props.push(`lx="${p.labelX || 'x'}"`);
                 props.push(`ly="${p.labelY || 'y'}"`);
+                if (p.labelPos) props.push(`lp="${p.labelPos}"`);
+                if (p.labelHorizontal) props.push('lh=1');
             } else if (elem.type === 'coord_system_x') {
                 props.push(`sx=${p.sizeX || 100}`);
                 props.push(`lx="${p.labelX || 'x'}"`);
+                if (p.labelPos) props.push(`lp="${p.labelPos}"`);
+                if (p.labelHorizontal) props.push('lh=1');
             }
             parts.push(`${typeName}: ${props.join(', ')}`);
         }
@@ -2828,8 +3184,12 @@
                 props.length = parseFloat(parsedProps.L) || 80;
                 props.label = parsedProps.label || 'A';
                 props.dir = parsedProps.dir || 'right';
+                props.labelPos = parsedProps.lp || 'N';
+                if (parsedProps.lh === '1') props.labelHorizontal = true;
             } else if (type === 'cross_section') {
                 props.label = parsedProps.label || 'A-A';
+                props.labelPos = parsedProps.lp || 'S';
+                if (parsedProps.lh === '1') props.labelHorizontal = true;
                 const shapes = [];
                 let shapesStr = parsedProps.shapes || '';
                 if (shapesStr.startsWith('[') && shapesStr.endsWith(']')) {
@@ -2928,9 +3288,13 @@
                 props.sizeY = parseFloat(parsedProps.sy) || 80;
                 props.labelX = parsedProps.lx !== undefined ? parsedProps.lx : 'x';
                 props.labelY = parsedProps.ly !== undefined ? parsedProps.ly : 'y';
+                props.labelPos = parsedProps.lp || 'E';
+                if (parsedProps.lh === '1') props.labelHorizontal = true;
             } else if (type === 'coord_system_x') {
                 props.sizeX = parseFloat(parsedProps.sx) || 100;
                 props.labelX = parsedProps.lx !== undefined ? parsedProps.lx : 'x';
+                props.labelPos = parsedProps.lp || 'E';
+                if (parsedProps.lh === '1') props.labelHorizontal = true;
             }
             elements.push({ type, x, y, rotation: rot, props });
         }

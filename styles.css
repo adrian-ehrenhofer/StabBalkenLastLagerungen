@@ -715,6 +715,14 @@ input:checked+.toggle-track .toggle-thumb {
     pointer-events: none;
 }
 
+.selection-marquee {
+    fill: rgba(59, 130, 246, 0.12);
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+    pointer-events: none;
+}
+
 .rotation-handle {
     cursor: grab;
 }
