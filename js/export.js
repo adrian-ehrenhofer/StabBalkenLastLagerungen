@@ -25,7 +25,7 @@ export function exportSVG(svgEl, elements) {
  * @param {number} [scale=2] - Resolution scale factor
  */
 export function exportPNG(svgEl, elements, scale = 2) {
-    const { svgString, width, height } = buildCleanSVG(svgEl, elements);
+    const { svgString, width, height } = buildCleanSVG(svgEl, elements, 12);
 
     const canvas = document.createElement('canvas');
     canvas.width = width * scale;
@@ -61,9 +61,12 @@ export function exportPNG(svgEl, elements, scale = 2) {
 
 /**
  * Build a clean SVG string for export.
+ * @param {SVGSVGElement} svgEl
+ * @param {Map<string, Object>} elements
+ * @param {number} [padding=40]
  * @returns {{ svgString: string, width: number, height: number }}
  */
-function buildCleanSVG(svgEl, elements) {
+function buildCleanSVG(svgEl, elements, padding = 40) {
     // Calculate bounding box of all elements
     const elementsLayer = svgEl.querySelector('#elements-layer');
     let bbox;
@@ -73,11 +76,11 @@ function buildCleanSVG(svgEl, elements) {
         bbox = { x: 0, y: 0, width: 800, height: 600 };
     }
 
-    const padding = 40;
-    const vbX = bbox.x - padding;
-    const vbY = bbox.y - padding;
-    const vbW = bbox.width + padding * 2;
-    const vbH = bbox.height + padding * 2;
+    const pad = padding;
+    const vbX = bbox.x - pad;
+    const vbY = bbox.y - pad;
+    const vbW = bbox.width + pad * 2;
+    const vbH = bbox.height + pad * 2;
 
     // Ensure minimum size
     const width = Math.max(vbW, 200);

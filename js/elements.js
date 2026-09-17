@@ -23,52 +23,57 @@ export const ELEMENT_TYPES = {
     beam: {
         name: 'Balken',
         category: 'stäbe',
-        defaults: { length: 200, height: 8 },
+        defaults: { length: 200, height: 8, color: '#000000' },
     },
     festlager: {
         name: 'Festlager',
         category: 'lager',
-        defaults: { size: 22, label: '' },
+        defaults: { size: 22, label: '', color: '#000000' },
     },
     loslager: {
         name: 'Loslager',
         category: 'lager',
-        defaults: { size: 22, label: '' },
+        defaults: { size: 22, label: '', color: '#000000' },
     },
     einspannung: {
         name: 'Einspannung',
         category: 'lager',
-        defaults: { wallLength: 70, wallWidth: 12 },
+        defaults: { wallLength: 70, wallWidth: 12, color: '#000000' },
     },
     gelenk: {
         name: 'Gelenk',
         category: 'verbindungen',
-        defaults: { radius: 6, label: '' },
+        defaults: { radius: 6, label: '', color: '#000000' },
     },
     einzelkraft: {
         name: 'Einzelkraft',
         category: 'lasten',
-        defaults: { magnitude: 70, label: 'F' },
+        defaults: { magnitude: 70, label: 'F', color: '#000000' },
     },
     streckenlast: {
         name: 'Streckenlast',
         category: 'lasten',
-        defaults: { length: 200, startMag: 50, endMag: 50, label: 'q₀', arrowSpacing: 25 },
+        defaults: { length: 200, startMag: 50, endMag: 50, label: 'q₀', arrowSpacing: 25, color: '#000000' },
     },
     moment: {
         name: 'Moment',
         category: 'lasten',
-        defaults: { radius: 25, label: 'M', direction: 'cw' },
+        defaults: { radius: 25, label: 'M', direction: 'cw', arcAngle: 270, color: '#000000' },
     },
     dimension: {
         name: 'Bemaßung',
         category: 'beschriftung',
-        defaults: { length: 200, label: 'a', offset: 8 },
+        defaults: { length: 200, label: 'a', offset: 8, color: '#000000' },
+    },
+    angle: {
+        name: 'Winkel',
+        category: 'beschriftung',
+        defaults: { radius: 35, startAngle: 0, arcAngle: 90, label: 'α', style: 'arc', arrows: 'both', color: '#000000' },
     },
     label: {
         name: 'Text',
         category: 'beschriftung',
-        defaults: { text: 'A', fontSize: 18 },
+        defaults: { text: 'A', fontSize: 18, color: '#000000' },
     },
 };
 
@@ -168,6 +173,8 @@ export function getElementBounds(elem) {
             return { x: -p.radius - 5, y: -p.radius - 5, width: (p.radius + 5) * 2, height: (p.radius + 5) * 2 };
         case 'dimension':
             return { x: 0, y: -p.offset - 10, width: p.length, height: p.offset + 20 };
+        case 'angle':
+            return { x: -p.radius - 15, y: -p.radius - 15, width: (p.radius + 15) * 2, height: (p.radius + 15) * 2 };
         case 'label':
             return { x: -5, y: -p.fontSize, width: p.fontSize * String(p.text).length * 0.6 + 10, height: p.fontSize + 5 };
         default:
@@ -228,6 +235,7 @@ const RENDERERS = {
     streckenlast: renderStreckenlast,
     moment: renderMoment,
     dimension: renderDimension,
+    angle: renderAngle,
     label: renderLabel,
 };
 
@@ -235,28 +243,30 @@ const RENDERERS = {
 function renderBeam(g, props) {
     const { length, height } = props;
     const h = height || 8;
+    const color = props.color || '#000000';
 
     // Main beam body
     g.appendChild(svg('rect', {
         x: 0, y: -h / 2,
         width: length, height: h,
-        fill: '#e2e8f0', stroke: '#1e293b', 'stroke-width': 1.8,
+        fill: '#e2e8f0', stroke: color, 'stroke-width': 1.8,
         rx: 0.5,
     }));
 
     // Endpoint markers (small circles for connection points)
     g.appendChild(svg('circle', {
         cx: 0, cy: 0, r: 2.5,
-        fill: '#1e293b', class: 'beam-endpoint',
+        fill: color, class: 'beam-endpoint',
     }));
     g.appendChild(svg('circle', {
         cx: length, cy: 0, r: 2.5,
-        fill: '#1e293b', class: 'beam-endpoint',
+        fill: color, class: 'beam-endpoint',
     }));
 }
 
 /* ─── Festlager (Fixed Support) ─── */
 function renderFestlager(g, props) {
+    const color = props.color || '#000000';
     const s = props.size || 22;
     const triH = s;
     const triW = s * 0.75;
@@ -264,7 +274,7 @@ function renderFestlager(g, props) {
     // Triangle
     g.appendChild(svg('polygon', {
         points: `0,0 ${-triW},${triH} ${triW},${triH}`,
-        fill: 'none', stroke: '#1e293b', 'stroke-width': 2,
+        fill: 'none', stroke: color, 'stroke-width': 2,
         'stroke-linejoin': 'round',
     }));
 
@@ -272,7 +282,7 @@ function renderFestlager(g, props) {
     const gw = triW + 6;
     g.appendChild(svg('line', {
         x1: -gw, y1: triH, x2: gw, y2: triH,
-        stroke: '#1e293b', 'stroke-width': 2,
+        stroke: color, 'stroke-width': 2,
     }));
 
     // Hatching
@@ -283,14 +293,14 @@ function renderFestlager(g, props) {
         g.appendChild(svg('line', {
             x1: x, y1: triH,
             x2: x - 5, y2: triH + 7,
-            stroke: '#1e293b', 'stroke-width': 1.2,
+            stroke: color, 'stroke-width': 1.2,
         }));
     }
 
     // Pin circle at top
     g.appendChild(svg('circle', {
         cx: 0, cy: 0, r: 3,
-        fill: 'white', stroke: '#1e293b', 'stroke-width': 1.5,
+        fill: 'white', stroke: color, 'stroke-width': 1.5,
     }));
 
     // Label
@@ -298,13 +308,14 @@ function renderFestlager(g, props) {
         g.appendChild(svg('text', {
             x: triW + 8, y: 5,
             'font-size': 16, 'font-family': 'Inter, sans-serif',
-            'font-weight': '600', fill: '#1e293b',
+            'font-weight': '600', fill: color,
         })).textContent = props.label;
     }
 }
 
 /* ─── Loslager (Roller Support) ─── */
 function renderLoslager(g, props) {
+    const color = props.color || '#000000';
     const s = props.size || 22;
     const triH = s;
     const triW = s * 0.75;
@@ -313,22 +324,22 @@ function renderLoslager(g, props) {
     // Triangle
     g.appendChild(svg('polygon', {
         points: `0,0 ${-triW},${triH} ${triW},${triH}`,
-        fill: 'none', stroke: '#1e293b', 'stroke-width': 2,
+        fill: 'none', stroke: color, 'stroke-width': 2,
         'stroke-linejoin': 'round',
     }));
 
     // Rollers
     const rollerY = triH + rollerR + 1;
-    g.appendChild(svg('circle', { cx: -triW * 0.5, cy: rollerY, r: rollerR, fill: 'none', stroke: '#1e293b', 'stroke-width': 1.5 }));
-    g.appendChild(svg('circle', { cx: 0, cy: rollerY, r: rollerR, fill: 'none', stroke: '#1e293b', 'stroke-width': 1.5 }));
-    g.appendChild(svg('circle', { cx: triW * 0.5, cy: rollerY, r: rollerR, fill: 'none', stroke: '#1e293b', 'stroke-width': 1.5 }));
+    g.appendChild(svg('circle', { cx: -triW * 0.5, cy: rollerY, r: rollerR, fill: 'none', stroke: color, 'stroke-width': 1.5 }));
+    g.appendChild(svg('circle', { cx: 0, cy: rollerY, r: rollerR, fill: 'none', stroke: color, 'stroke-width': 1.5 }));
+    g.appendChild(svg('circle', { cx: triW * 0.5, cy: rollerY, r: rollerR, fill: 'none', stroke: color, 'stroke-width': 1.5 }));
 
     // Ground line
     const gw = triW + 6;
     const groundY = rollerY + rollerR + 1;
     g.appendChild(svg('line', {
         x1: -gw, y1: groundY, x2: gw, y2: groundY,
-        stroke: '#1e293b', 'stroke-width': 2,
+        stroke: color, 'stroke-width': 2,
     }));
 
     // Hatching
@@ -339,14 +350,14 @@ function renderLoslager(g, props) {
         g.appendChild(svg('line', {
             x1: x, y1: groundY,
             x2: x - 5, y2: groundY + 7,
-            stroke: '#1e293b', 'stroke-width': 1.2,
+            stroke: color, 'stroke-width': 1.2,
         }));
     }
 
     // Pin circle at top
     g.appendChild(svg('circle', {
         cx: 0, cy: 0, r: 3,
-        fill: 'white', stroke: '#1e293b', 'stroke-width': 1.5,
+        fill: 'white', stroke: color, 'stroke-width': 1.5,
     }));
 
     // Label
@@ -354,20 +365,21 @@ function renderLoslager(g, props) {
         g.appendChild(svg('text', {
             x: triW + 8, y: 5,
             'font-size': 16, 'font-family': 'Inter, sans-serif',
-            'font-weight': '600', fill: '#1e293b',
+            'font-weight': '600', fill: color,
         })).textContent = props.label;
     }
 }
 
 /* ─── Einspannung (Fixed Wall) ─── */
 function renderEinspannung(g, props) {
+    const color = props.color || '#000000';
     const wl = props.wallLength || 70;
     const ww = props.wallWidth || 12;
 
     // Wall face (thick vertical line at x=0)
     g.appendChild(svg('line', {
         x1: 0, y1: -wl / 2, x2: 0, y2: wl / 2,
-        stroke: '#1e293b', 'stroke-width': 2.5,
+        stroke: color, 'stroke-width': 2.5,
     }));
 
     // Hatching (diagonal lines extending to the right of the wall face)
@@ -378,18 +390,19 @@ function renderEinspannung(g, props) {
         g.appendChild(svg('line', {
             x1: 0, y1: y,
             x2: ww, y2: y + hatchSpacing,
-            stroke: '#1e293b', 'stroke-width': 1.2,
+            stroke: color, 'stroke-width': 1.2,
         }));
     }
 }
 
 /* ─── Gelenk (Pin Joint) ─── */
 function renderGelenk(g, props) {
+    const color = props.color || '#000000';
     const r = props.radius || 6;
 
     g.appendChild(svg('circle', {
         cx: 0, cy: 0, r: r,
-        fill: 'white', stroke: '#1e293b', 'stroke-width': 2,
+        fill: 'white', stroke: color, 'stroke-width': 2,
     }));
 
     // Label
@@ -397,13 +410,14 @@ function renderGelenk(g, props) {
         g.appendChild(svg('text', {
             x: r + 5, y: -r,
             'font-size': 14, 'font-family': 'Inter, sans-serif',
-            'font-weight': '600', fill: '#1e293b',
+            'font-weight': '600', fill: color,
         })).textContent = props.label;
     }
 }
 
 /* ─── Einzelkraft (Single Force Arrow) ─── */
 function renderEinzelkraft(g, props) {
+    const color = props.color || '#000000';
     const mag = props.magnitude || 70;
     const headLen = 10;
     const headW = 5;
@@ -412,13 +426,13 @@ function renderEinzelkraft(g, props) {
     g.appendChild(svg('line', {
         x1: 0, y1: 0,
         x2: mag - headLen, y2: 0,
-        stroke: '#1e293b', 'stroke-width': 2.2,
+        stroke: color, 'stroke-width': 2.2,
     }));
 
     // Arrowhead
     g.appendChild(svg('polygon', {
         points: `${mag},0 ${mag - headLen},${-headW} ${mag - headLen},${headW}`,
-        fill: '#1e293b',
+        fill: color,
     }));
 
     // Label
@@ -428,13 +442,14 @@ function renderEinzelkraft(g, props) {
             'text-anchor': 'end',
             'font-size': 18, 'font-family': 'Inter, sans-serif',
             'font-style': 'italic', 'font-weight': '500',
-            fill: '#1e293b',
+            fill: color,
         })).textContent = props.label;
     }
 }
 
 /* ─── Streckenlast (Distributed Load) ─── */
 function renderStreckenlast(g, props) {
+    const color = props.color || '#000000';
     const { length, startMag, endMag, label, arrowSpacing } = props;
     const spacing = arrowSpacing || 25;
     const numArrows = Math.max(2, Math.floor(length / spacing) + 1);
@@ -451,7 +466,7 @@ function renderStreckenlast(g, props) {
     }
     g.appendChild(svg('polyline', {
         points: profilePoints.join(' '),
-        fill: 'none', stroke: '#1e293b', 'stroke-width': 1.5,
+        fill: 'none', stroke: color, 'stroke-width': 1.5,
     }));
 
     // Individual arrows
@@ -465,13 +480,13 @@ function renderStreckenlast(g, props) {
         g.appendChild(svg('line', {
             x1: x, y1: -mag,
             x2: x, y2: -headLen,
-            stroke: '#1e293b', 'stroke-width': 1.5,
+            stroke: color, 'stroke-width': 1.5,
         }));
 
         // Arrowhead pointing down toward y=0
         g.appendChild(svg('polygon', {
             points: `${x},0 ${x - headW},${-headLen} ${x + headW},${-headLen}`,
-            fill: '#1e293b',
+            fill: color,
         }));
     }
 
@@ -485,22 +500,21 @@ function renderStreckenlast(g, props) {
             'text-anchor': endMag >= startMag ? 'end' : 'start',
             'font-size': 16, 'font-family': 'Inter, sans-serif',
             'font-style': 'italic', 'font-weight': '500',
-            fill: '#1e293b',
+            fill: color,
         })).textContent = label;
     }
 }
 
 /* ─── Moment (Torque) ─── */
 function renderMoment(g, props) {
+    const color = props.color || '#000000';
     const r = props.radius || 25;
     const dir = props.direction || 'cw';
+    const arcAngle = props.arcAngle !== undefined ? props.arcAngle : 270;
     const headLen = 8;
 
-    // Arc (about 270 degrees)
-    // For CW: arc from top going clockwise
-    // For CCW: arc from top going counter-clockwise
     const startAngle = -90;
-    const sweep = dir === 'cw' ? 270 : -270;
+    const sweep = dir === 'cw' ? arcAngle : -arcAngle;
     const endAngle = startAngle + sweep;
 
     const startRad = startAngle * Math.PI / 180;
@@ -516,20 +530,19 @@ function renderMoment(g, props) {
 
     g.appendChild(svg('path', {
         d: `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} ${sweepFlag} ${x2} ${y2}`,
-        fill: 'none', stroke: '#1e293b', 'stroke-width': 2,
+        fill: 'none', stroke: color, 'stroke-width': 2,
     }));
 
     // Arrowhead at the end of the arc
-    // Calculate tangent direction at the end point
-    const tangentAngle = endRad + (dir === 'cw' ? Math.PI / 2 : -Math.PI / 2);
-    const ax = x2 + headLen * Math.cos(tangentAngle + 0.4);
-    const ay = y2 + headLen * Math.sin(tangentAngle + 0.4);
-    const bx = x2 + headLen * Math.cos(tangentAngle - 0.4);
-    const by = y2 + headLen * Math.sin(tangentAngle - 0.4);
+    const tangentAngle = endRad + (sweep > 0 ? Math.PI / 2 : -Math.PI / 2);
+    const ax = x2 - headLen * Math.cos(tangentAngle + 0.4);
+    const ay = y2 - headLen * Math.sin(tangentAngle + 0.4);
+    const bx = x2 - headLen * Math.cos(tangentAngle - 0.4);
+    const by = y2 - headLen * Math.sin(tangentAngle - 0.4);
 
     g.appendChild(svg('polygon', {
         points: `${x2},${y2} ${ax},${ay} ${bx},${by}`,
-        fill: '#1e293b',
+        fill: color,
     }));
 
     // Label
@@ -539,13 +552,14 @@ function renderMoment(g, props) {
             'text-anchor': 'middle',
             'font-size': 18, 'font-family': 'Inter, sans-serif',
             'font-style': 'italic', 'font-weight': '500',
-            fill: '#1e293b',
+            fill: color,
         })).textContent = props.label;
     }
 }
 
 /* ─── Dimension Line (Bemaßung) ─── */
 function renderDimension(g, props) {
+    const color = props.color || '#000000';
     const { length, label, offset } = props;
     const tickH = offset || 8;
     const headLen = 6;
@@ -554,31 +568,31 @@ function renderDimension(g, props) {
     // Left tick
     g.appendChild(svg('line', {
         x1: 0, y1: -tickH, x2: 0, y2: tickH,
-        stroke: '#1e293b', 'stroke-width': 1.3,
+        stroke: color, 'stroke-width': 1.3,
     }));
 
     // Right tick
     g.appendChild(svg('line', {
         x1: length, y1: -tickH, x2: length, y2: tickH,
-        stroke: '#1e293b', 'stroke-width': 1.3,
+        stroke: color, 'stroke-width': 1.3,
     }));
 
     // Main dimension line
     g.appendChild(svg('line', {
         x1: 0, y1: 0, x2: length, y2: 0,
-        stroke: '#1e293b', 'stroke-width': 1.3,
+        stroke: color, 'stroke-width': 1.3,
     }));
 
     // Left arrowhead
     g.appendChild(svg('polygon', {
         points: `0,0 ${headLen},${-headW} ${headLen},${headW}`,
-        fill: '#1e293b',
+        fill: color,
     }));
 
     // Right arrowhead
     g.appendChild(svg('polygon', {
         points: `${length},0 ${length - headLen},${-headW} ${length - headLen},${headW}`,
-        fill: '#1e293b',
+        fill: color,
     }));
 
     // Label (centered above the line)
@@ -588,13 +602,109 @@ function renderDimension(g, props) {
             'text-anchor': 'middle',
             'font-size': 16, 'font-family': 'Inter, sans-serif',
             'font-style': 'italic', 'font-weight': '500',
-            fill: '#1e293b',
+            fill: color,
         })).textContent = label;
+    }
+}
+
+/* ─── Angle Marker (Winkelbemaßung) ─── */
+function renderAngle(g, props) {
+    const color = props.color || '#000000';
+    const r = props.radius || 35;
+    const saDeg = props.startAngle || 0;
+    const arcDeg = props.arcAngle !== undefined ? props.arcAngle : 90;
+    const style = props.style || 'arc'; // 'arc' or 'square'
+    const arrows = props.arrows || 'both'; // 'both', 'end', 'start', 'dot', 'none'
+    const label = props.label || 'α';
+    const headLen = 7;
+
+    const sa = saDeg * Math.PI / 180;
+    const ea = (saDeg + arcDeg) * Math.PI / 180;
+
+    if (style === 'square') {
+        const x1 = r * Math.cos(sa), y1 = r * Math.sin(sa);
+        const x2 = r * Math.cos(ea), y2 = r * Math.sin(ea);
+        const cx = x1 + x2, cy = y1 + y2;
+
+        g.appendChild(svg('polyline', {
+            points: `${x1},${y1} ${cx},${cy} ${x2},${y2}`,
+            fill: 'none', stroke: color, 'stroke-width': 1.5,
+        }));
+
+        if (arrows === 'dot') {
+            g.appendChild(svg('circle', {
+                cx: cx * 0.5, cy: cy * 0.5, r: 2.5,
+                fill: color,
+            }));
+        }
+    } else {
+        const x1 = r * Math.cos(sa), y1 = r * Math.sin(sa);
+        const x2 = r * Math.cos(ea), y2 = r * Math.sin(ea);
+
+        const largeArc = Math.abs(arcDeg) > 180 ? 1 : 0;
+        const sweepFlag = arcDeg > 0 ? 1 : 0;
+
+        g.appendChild(svg('path', {
+            d: `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} ${sweepFlag} ${x2} ${y2}`,
+            fill: 'none', stroke: color, 'stroke-width': 1.5,
+        }));
+
+        if (arrows === 'both' || arrows === 'end') {
+            const taEnd = ea + (arcDeg > 0 ? Math.PI / 2 : -Math.PI / 2);
+            const ax = x2 - headLen * Math.cos(taEnd - 0.35);
+            const ay = y2 - headLen * Math.sin(taEnd - 0.35);
+            const bx = x2 - headLen * Math.cos(taEnd + 0.35);
+            const by = y2 - headLen * Math.sin(taEnd + 0.35);
+            g.appendChild(svg('polygon', {
+                points: `${x2},${y2} ${ax},${ay} ${bx},${by}`,
+                fill: color,
+            }));
+        }
+
+        if (arrows === 'both' || arrows === 'start') {
+            const taStart = sa + (arcDeg > 0 ? -Math.PI / 2 : Math.PI / 2);
+            const ax = x1 - headLen * Math.cos(taStart - 0.35);
+            const ay = y1 - headLen * Math.sin(taStart - 0.35);
+            const bx = x1 - headLen * Math.cos(taStart + 0.35);
+            const by = y1 - headLen * Math.sin(taStart + 0.35);
+            g.appendChild(svg('polygon', {
+                points: `${x1},${y1} ${ax},${ay} ${bx},${by}`,
+                fill: color,
+            }));
+        }
+
+        if (arrows === 'dot') {
+            const midRad = (sa + ea) / 2;
+            g.appendChild(svg('circle', {
+                cx: (r * 0.5) * Math.cos(midRad),
+                cy: (r * 0.5) * Math.sin(midRad),
+                r: 2.5,
+                fill: color,
+            }));
+        }
+    }
+
+    if (label) {
+        const midRad = (sa + ea) / 2;
+        const labelR = r + 14;
+        const lx = labelR * Math.cos(midRad);
+        const ly = labelR * Math.sin(midRad);
+
+        const textEl = svg('text', {
+            x: lx, y: ly + 4,
+            'text-anchor': 'middle',
+            'font-size': 16, 'font-family': 'Inter, sans-serif',
+            'font-style': 'italic', 'font-weight': '500',
+            fill: color,
+        });
+        textEl.textContent = label;
+        g.appendChild(textEl);
     }
 }
 
 /* ─── Text Label ─── */
 function renderLabel(g, props) {
+    const color = props.color || '#000000';
     const { text, fontSize } = props;
 
     g.appendChild(svg('text', {
@@ -602,7 +712,7 @@ function renderLabel(g, props) {
         'font-size': fontSize || 18,
         'font-family': 'Inter, sans-serif',
         'font-weight': '600',
-        fill: '#1e293b',
+        fill: color,
         'dominant-baseline': 'central',
     })).textContent = text || 'A';
 }
