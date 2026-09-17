@@ -175,6 +175,591 @@
     }
 
     /* ════════════════════════════════════════════════════
+       INTERNATIONALIZATION (i18n) MODULE
+       ════════════════════════════════════════════════════ */
+
+    const I18N = {
+        de: {
+            app: {
+                title: 'TM-Aufgabenbilder-Editor',
+                description: 'Browser-basierter SVG-Editor zum Erstellen von Aufgabenbildern für Technische Mechanik (Stäbe, Balken, Lager, Lasten).'
+            },
+            toolbar: {
+                pointer: 'Auswählen (V)',
+                undo: 'Rückgängig (Strg+Z)',
+                redo: 'Wiederholen (Strg+Y)',
+                gridToggle: 'Raster ein/aus',
+                grid: 'Raster',
+                gridSize: 'Rastergröße in Pixel',
+                snapToggle: 'Am Raster einrasten',
+                snap: 'Einrasten',
+                delete: 'Ausgewähltes Element löschen (Entf)',
+                help: 'Hilfe & Werkzeugübersicht öffnen',
+                helpBtn: 'Hilfe',
+                random: 'Zufälliges Aufgabenbild generieren',
+                randomBtn: 'Zufall',
+                exportSvg: 'Als SVG-Datei exportieren',
+                exportSvgBtn: 'SVG',
+                exportPng: 'Als PNG-Bild mit schmalem Rand exportieren',
+                exportPngBtn: 'PNG'
+            },
+            shareBar: {
+                label: 'Zeichnungs-Code:',
+                labelTitle: 'Diesen Code kopieren, um die Zeichnung zu speichern. Alternativ einen Code hier einfügen und "Laden" klicken.',
+                infoTitle: 'Kopieren Sie diesen Code zum Speichern der Zeichnung oder fügen Sie einen Code ein und klicken auf "Laden"',
+                placeholder: 'Warten auf Zeichnung...',
+                copy: 'Kopieren',
+                copyTitle: 'Code in Zwischenablage kopieren',
+                load: 'Laden',
+                loadTitle: 'Zeichnung aus eingegebenem Code laden',
+                copied: 'Kopiert!',
+                invalidCode: 'Ungültiger Zeichnungs-Code!',
+                loadError: 'Fehler beim Laden des Zeichnungs-Codes: '
+            },
+            toolbox: {
+                bars: 'Stäbe',
+                barsInfo: 'Balken, gebogene Balken und Pendelstäbe zeichnen',
+                bearings: 'Lager',
+                bearingsInfo: 'Festlager, Loslager und Einspannungen an Balken anbringen',
+                connections: 'Verbindungen',
+                connectionsInfo: 'Gelenke zwischen Stäben/Balken platzieren',
+                sections: 'Schnitte',
+                sectionsInfo: 'Schnittlinien (A-A) und Querschnitte erstellen',
+                loads: 'Lasten',
+                loadsInfo: 'Einzelkräfte, Streckenlasten und Drehmomente anbringen',
+                annotation: 'Beschriftung',
+                annotationInfo: 'Längen- & Winkelbemaßungen sowie Freitext einfügen',
+                drawing: 'Zeichnen & Koordinaten',
+                drawingInfo: 'Linien, Pfeile und Koordinatensysteme zeichnen'
+            },
+            tools: {
+                beam: 'Balken',
+                curvedBeam: 'Balken (gebogen)',
+                curvedBeamShort: 'Geb. Balken',
+                bar: 'Stab (Pendelstab)',
+                festlager: 'Festlager',
+                loslager: 'Loslager',
+                einspannung: 'Einspannung',
+                gelenk: 'Gelenk',
+                sectionCut: 'Schnittlinie',
+                crossSection: 'Querschnitt',
+                force: 'Einzelkraft',
+                distLoad: 'Streckenlast',
+                moment: 'Moment',
+                dimension: 'Bemaßung',
+                angle: 'Winkel',
+                label: 'Text',
+                line: 'Linie',
+                arrow: 'Pfeil',
+                coordXy: 'x-y-Koordinatensystem',
+                coordXyShort: 'Ksys (x-y)',
+                coordX: 'x-Koordinatenachse',
+                coordXShort: 'Ksys (x)'
+            },
+            properties: {
+                title: 'Eigenschaften',
+                noSelectionTitle: 'Kein Element ausgewählt',
+                noSelectionHint: 'Wählen Sie ein Werkzeug und klicken Sie auf die Zeichenfläche, oder wählen Sie ein bestehendes Element aus.',
+                multiSelectionTitle: 'Mehrfachauswahl',
+                multiSelectionCount: '{n} Elemente ausgewählt',
+                multiSelectionHint: 'Nutzen Sie Strg+C & Strg+V zum Kopieren/Einfügen oder ziehen Sie die Elemente gemeinsam.',
+                deleteElement: '✕ Element löschen',
+                deleteMultiElements: '✕ {n} Elemente löschen',
+                addShape: '+ Form hinzufügen',
+                shapeHeader: 'Form #{n}: {type}',
+                groupPosition: 'Position',
+                groupColor: 'Farbe',
+                groupBeam: 'Balken',
+                groupCurvedBeam: 'Gebogener Balken',
+                groupBar: 'Stab',
+                groupSupport: 'Lager',
+                groupClamping: 'Einspannung',
+                groupHinge: 'Gelenk',
+                groupForce: 'Kraft',
+                groupDistLoad: 'Streckenlast',
+                groupMoment: 'Moment',
+                groupDimension: 'Bemaßung',
+                groupAngle: 'Winkel',
+                groupText: 'Text',
+                groupSectionCut: 'Schnittlinie',
+                groupCrossSection: 'Querschnitts-Zeichnung',
+                groupCompositeShapes: 'Formen (Zusammengesetzt)',
+                groupLine: 'Linie',
+                groupArrow: 'Pfeil',
+                groupCoordXy: 'Koordinatensystem (x-y)',
+                groupCoordX: 'Koordinatenachse (x)',
+                lblX: 'X',
+                lblY: 'Y',
+                lblRotation: 'Drehung',
+                lblColor: 'Farbe',
+                lblLength: 'Länge',
+                lblHeight: 'Höhe',
+                lblWidth: 'Breite',
+                lblRadius: 'Radius',
+                lblStartAngle: 'Startwinkel',
+                lblEndAngle: 'Endwinkel',
+                lblHingeRadius: 'Gelenkradius',
+                lblSize: 'Größe',
+                lblLabel: 'Beschr.',
+                lblTextAlign: 'Textausricht.',
+                lblTextPos: 'Textposition',
+                lblVariant: 'Darstellung',
+                lblStart: 'Start',
+                lblEnd: 'Ende',
+                lblDistribution: 'Verteilung',
+                lblAmplitude: 'Amplitude',
+                lblFormula: 'Formel',
+                lblSpacing: 'Abstand',
+                lblArcAngle: 'Öffnungswinkel',
+                lblPresets: 'Vorlagen',
+                lblDirection: 'Richtung',
+                lblOffset: 'Offset',
+                lblType: 'Typ',
+                lblArrows: 'Pfeile',
+                lblFontSize: 'Größe',
+                lblCutDirection: 'Richtung',
+                lblPrefix: 'Präfix',
+                lblTitle: 'Titel',
+                lblLineStyle: 'Linienstil',
+                lblThickness: 'Stärke',
+                lblStyle: 'Stil',
+                lblSizeX: 'Länge X',
+                lblSizeY: 'Länge Y',
+                lblLabelX: 'Label X',
+                lblLabelY: 'Label Y',
+                textAlignRotate: 'Mit Element drehen',
+                textAlignHorizontal: 'Horizontal halten',
+                posNW: 'Nordwest',
+                posN: 'Norden',
+                posNE: 'Nordost',
+                posE: 'Osten',
+                posSE: 'Südost',
+                posS: 'Süden',
+                posSW: 'Südwest',
+                posW: 'Westen',
+                variantLines: 'Linien (Gleiter)',
+                variantRollers: 'Rollen (Kugeln)',
+                distLinear: 'Linear',
+                distSine: 'Sinus',
+                distParabola: 'Parabel',
+                distCustom: 'Formel',
+                preset180: '180° (Halbkreis)',
+                preset270: '270° (3/4 Kreis)',
+                preset90: '90° (Viertelkreis)',
+                preset360: '360° (Vollkreis)',
+                dirCw: 'Im Uhrzeigersinn',
+                dirCcw: 'Gegen Uhrzeigersinn',
+                angleArc: 'Bogen (Kreisbogen)',
+                angleSquare: 'Rechtwinklig (90° Eck)',
+                arrowsBoth: 'Beidseitig (Doppelpfeil)',
+                arrowsEnd: 'Am Ende',
+                arrowsStart: 'Am Anfang',
+                arrowsDot: 'Punkt (Rechter Winkel)',
+                arrowsNone: 'Keine',
+                shapeRect: 'Rechteck',
+                shapeTriangle: 'Dreieck',
+                shapeCircle: 'Kreis',
+                modeSolid: 'Voll (Solid)',
+                modeHole: 'Ausschnitt (Loch)',
+                lineSolid: 'Durchgezogen (Solid)',
+                lineDashed: 'Gestrichelt (Dashed)',
+                lineDotted: 'Gepunktet (Dotted)',
+                lineDashDot: 'Strichpunkt (Dash-Dot)',
+                dirRight: 'Rechts (►)',
+                dirLeft: 'Links (◄)',
+                cutPrefixTooltip: 'Bezeichnung vor dem Schnitt (z.B. "Schnitt", "Querschnitt", "Profil" oder leer lassen)'
+            },
+            status: {
+                grid: 'Raster: {size} px',
+                zoomOut: 'Verkleinern',
+                zoomIn: 'Vergrößern',
+                zoomFit: 'Einpassen',
+                elementsSingle: '1 Element',
+                elementsPlural: '{n} Elemente',
+                elementsSelected: '({n} ausgewählt)'
+            },
+            randomDialog: {
+                title: 'Zufälliges Aufgabenbild generieren',
+                subtitle: 'Geben Sie die Parameter für die Generierung ein.',
+                beams: 'Anzahl Balken:',
+                bars: 'Anzahl Pendelstäbe:',
+                bearings: 'Wertigkeit der Lager:',
+                loads: 'Anzahl Lasten:',
+                cancel: 'Abbrechen',
+                generate: 'Generieren'
+            },
+            help: {
+                title: 'Hilfe & Werkzeugübersicht',
+                close: 'Schließen',
+                body: `
+                <section class="help-section">
+                    <h3>Werkzeuge & Funktionen</h3>
+                    <ul>
+                        <li><strong>Auswählen (V):</strong> Elemente anklicken, um sie zu verschieben oder deren Eigenschaften rechts anzupassen. Drag & Drop zum Drehen oder Skalieren.</li>
+                        <li><strong>Stäbe & Balken:</strong> Gerade Balken, gebogene Balken und Pendelstäbe erstellen.</li>
+                        <li><strong>Lager:</strong> Festlager, Loslager (mit Linien oder Rollen) und Einspannungen an Balken verankern.</li>
+                        <li><strong>Lasten:</strong> Einzelkräfte, verteilte Streckenlasten und Momente.
+                            <br><em>Hinweis Moment:</em> Der Öffnungswinkel kann beliebig angepasst werden (z.B. 180° für Halbkreis, 270° Dreiviertelkreis, 90° oder freier Winkel in Grad).</li>
+                        <li><strong>Beschriftung & Winkel:</strong> Bemaßungen, Freitext und Winkelbemaßungen.
+                            <br><em>Hinweis Winkel:</em> Unterstützt Bögen und rechtwinklige 90°-Marker sowie Doppelpfeile, Einzelpfeile oder Punkte.</li>
+                    </ul>
+                </section>
+                <section class="help-section">
+                    <h3>Export & Speichern</h3>
+                    <ul>
+                        <li><strong>PNG-Export:</strong> Erstellt eine Bilddatei mit besonders schmalem weißem Rand.</li>
+                        <li><strong>SVG-Export:</strong> Vektorgrafik im SVG-Format.</li>
+                        <li><strong>Zeichnungs-Code:</strong> Text-Code kopieren zum Speichern und Einfügen.</li>
+                    </ul>
+                </section>
+                <section class="help-section">
+                    <h3>Tastenkombinationen</h3>
+                    <ul>
+                        <li><kbd>V</kbd> Auswählen-Werkzeug</li>
+                        <li><kbd>Strg</kbd> + <kbd>C</kbd> Ausgewählte(s) Element(e) kopieren</li>
+                        <li><kbd>Strg</kbd> + <kbd>V</kbd> Kopierte Element(e) einfügen</li>
+                        <li><kbd>Strg</kbd> + <kbd>D</kbd> Ausgewählte(s) Element(e) duplizieren</li>
+                        <li><kbd>Shift</kbd> / <kbd>Strg</kbd> + Klick Mehrere Elemente auswählen</li>
+                        <li><kbd>Entf</kbd> / <kbd>Backspace</kbd> Ausgewählte(s) Element(e) löschen</li>
+                        <li><kbd>Strg</kbd> + <kbd>Z</kbd> Rückgängig</li>
+                        <li><kbd>Strg</kbd> + <kbd>Y</kbd> Wiederholen</li>
+                    </ul>
+                </section>`
+            }
+        },
+        en: {
+            app: {
+                title: 'Structural Mechanics Diagram Editor',
+                description: 'Browser-based SVG editor for creating beam problem diagrams for engineering mechanics (bars, beams, supports, loads).'
+            },
+            toolbar: {
+                pointer: 'Select (V)',
+                undo: 'Undo (Ctrl+Z)',
+                redo: 'Redo (Ctrl+Y)',
+                gridToggle: 'Toggle grid on/off',
+                grid: 'Grid',
+                gridSize: 'Grid size in pixels',
+                snapToggle: 'Snap to grid',
+                snap: 'Snap',
+                delete: 'Delete selected element (Del)',
+                help: 'Open help & tool overview',
+                helpBtn: 'Help',
+                random: 'Generate random problem diagram',
+                randomBtn: 'Random',
+                exportSvg: 'Export as SVG file',
+                exportSvgBtn: 'SVG',
+                exportPng: 'Export as PNG image with narrow border',
+                exportPngBtn: 'PNG'
+            },
+            shareBar: {
+                label: 'Drawing Code:',
+                labelTitle: 'Copy this code to save the drawing. Alternatively paste a code here and click "Load".',
+                infoTitle: 'Copy this code to save the drawing or paste a code and click "Load"',
+                placeholder: 'Waiting for drawing...',
+                copy: 'Copy',
+                copyTitle: 'Copy code to clipboard',
+                load: 'Load',
+                loadTitle: 'Load drawing from entered code',
+                copied: 'Copied!',
+                invalidCode: 'Invalid drawing code!',
+                loadError: 'Error loading drawing code: '
+            },
+            toolbox: {
+                bars: 'Beams & Bars',
+                barsInfo: 'Draw beams, curved beams, and truss bars',
+                bearings: 'Supports',
+                bearingsInfo: 'Attach pinned supports, roller supports, and fixed supports',
+                connections: 'Connections',
+                connectionsInfo: 'Place hinges and pins between bars and beams',
+                sections: 'Sections',
+                sectionsInfo: 'Create section lines (A-A) and cross-sections',
+                loads: 'Loads',
+                loadsInfo: 'Apply concentrated forces, distributed loads, and moments',
+                annotation: 'Annotation',
+                annotationInfo: 'Insert dimension lines, angles, and text labels',
+                drawing: 'Drawing & Coordinates',
+                drawingInfo: 'Draw free lines, arrows, and coordinate systems'
+            },
+            tools: {
+                beam: 'Beam',
+                curvedBeam: 'Curved Beam',
+                curvedBeamShort: 'Curv. Beam',
+                bar: 'Truss Bar',
+                festlager: 'Pinned Support',
+                loslager: 'Roller Support',
+                einspannung: 'Fixed Support',
+                gelenk: 'Hinge / Pin',
+                sectionCut: 'Section Line',
+                crossSection: 'Cross-Section',
+                force: 'Point Force',
+                distLoad: 'Distributed Load',
+                moment: 'Bending Moment',
+                dimension: 'Dimension',
+                angle: 'Angle',
+                label: 'Text',
+                line: 'Line',
+                arrow: 'Arrow',
+                coordXy: 'x-y Coordinate System',
+                coordXyShort: 'Coord (x-y)',
+                coordX: 'x Coordinate Axis',
+                coordXShort: 'Coord (x)'
+            },
+            properties: {
+                title: 'Properties',
+                noSelectionTitle: 'No element selected',
+                noSelectionHint: 'Select a tool and click on the canvas, or select an existing element.',
+                multiSelectionTitle: 'Multiple Selection',
+                multiSelectionCount: '{n} elements selected',
+                multiSelectionHint: 'Use Ctrl+C & Ctrl+V to copy/paste or drag elements together.',
+                deleteElement: '✕ Delete element',
+                deleteMultiElements: '✕ Delete {n} elements',
+                addShape: '+ Add shape',
+                shapeHeader: 'Shape #{n}: {type}',
+                groupPosition: 'Position',
+                groupColor: 'Color',
+                groupBeam: 'Beam',
+                groupCurvedBeam: 'Curved Beam',
+                groupBar: 'Truss Bar',
+                groupSupport: 'Support',
+                groupClamping: 'Fixed Support',
+                groupHinge: 'Hinge',
+                groupForce: 'Force',
+                groupDistLoad: 'Distributed Load',
+                groupMoment: 'Moment',
+                groupDimension: 'Dimension',
+                groupAngle: 'Angle',
+                groupText: 'Text',
+                groupSectionCut: 'Section Line',
+                groupCrossSection: 'Cross-Section Drawing',
+                groupCompositeShapes: 'Composite Shapes',
+                groupLine: 'Line',
+                groupArrow: 'Arrow',
+                groupCoordXy: 'Coordinate System (x-y)',
+                groupCoordX: 'Coordinate Axis (x)',
+                lblX: 'X',
+                lblY: 'Y',
+                lblRotation: 'Rotation',
+                lblColor: 'Color',
+                lblLength: 'Length',
+                lblHeight: 'Height',
+                lblWidth: 'Width',
+                lblRadius: 'Radius',
+                lblStartAngle: 'Start Angle',
+                lblEndAngle: 'End Angle',
+                lblHingeRadius: 'Hinge Radius',
+                lblSize: 'Size',
+                lblLabel: 'Label',
+                lblTextAlign: 'Text Align',
+                lblTextPos: 'Text Position',
+                lblVariant: 'Variant',
+                lblStart: 'Start',
+                lblEnd: 'End',
+                lblDistribution: 'Distribution',
+                lblAmplitude: 'Amplitude',
+                lblFormula: 'Formula',
+                lblSpacing: 'Spacing',
+                lblArcAngle: 'Arc Angle',
+                lblPresets: 'Presets',
+                lblDirection: 'Direction',
+                lblOffset: 'Offset',
+                lblType: 'Type',
+                lblArrows: 'Arrows',
+                lblFontSize: 'Font Size',
+                lblCutDirection: 'Direction',
+                lblPrefix: 'Prefix',
+                lblTitle: 'Title',
+                lblLineStyle: 'Line Style',
+                lblThickness: 'Line Width',
+                lblStyle: 'Style',
+                lblSizeX: 'Length X',
+                lblSizeY: 'Length Y',
+                lblLabelX: 'Label X',
+                lblLabelY: 'Label Y',
+                textAlignRotate: 'Rotate with element',
+                textAlignHorizontal: 'Keep horizontal',
+                posNW: 'North-West',
+                posN: 'North',
+                posNE: 'North-East',
+                posE: 'East',
+                posSE: 'South-East',
+                posS: 'South',
+                posSW: 'South-West',
+                posW: 'West',
+                variantLines: 'Lines (Slide base)',
+                variantRollers: 'Rollers (Balls)',
+                distLinear: 'Linear',
+                distSine: 'Sine',
+                distParabola: 'Parabola',
+                distCustom: 'Formula',
+                preset180: '180° (Semicircle)',
+                preset270: '270° (3/4 Circle)',
+                preset90: '90° (Quarter circle)',
+                preset360: '360° (Full circle)',
+                dirCw: 'Clockwise',
+                dirCcw: 'Counter-clockwise',
+                angleArc: 'Arc (Circular arc)',
+                angleSquare: 'Right angle (90° Corner)',
+                arrowsBoth: 'Both sides (Double arrow)',
+                arrowsEnd: 'At end',
+                arrowsStart: 'At start',
+                arrowsDot: 'Dot (Right angle)',
+                arrowsNone: 'None',
+                shapeRect: 'Rectangle',
+                shapeTriangle: 'Triangle',
+                shapeCircle: 'Circle',
+                modeSolid: 'Solid',
+                modeHole: 'Cutout (Hole)',
+                lineSolid: 'Solid',
+                lineDashed: 'Dashed',
+                lineDotted: 'Dotted',
+                lineDashDot: 'Dash-Dot',
+                dirRight: 'Right (►)',
+                dirLeft: 'Left (◄)',
+                cutPrefixTooltip: 'Prefix before the section label (e.g. "Section", "Cross-section", "Profile" or leave blank)'
+            },
+            status: {
+                grid: 'Grid: {size} px',
+                zoomOut: 'Zoom Out',
+                zoomIn: 'Zoom In',
+                zoomFit: 'Fit to View',
+                elementsSingle: '1 Element',
+                elementsPlural: '{n} Elements',
+                elementsSelected: '({n} selected)'
+            },
+            randomDialog: {
+                title: 'Generate Random Problem Diagram',
+                subtitle: 'Enter the parameters for generation.',
+                beams: 'Number of beams:',
+                bars: 'Number of truss bars:',
+                bearings: 'Degree of restraint / bearings:',
+                loads: 'Number of loads:',
+                cancel: 'Cancel',
+                generate: 'Generate'
+            },
+            help: {
+                title: 'Help & Tool Overview',
+                close: 'Close',
+                body: `
+                <section class="help-section">
+                    <h3>Tools & Features</h3>
+                    <ul>
+                        <li><strong>Select (V):</strong> Click elements to move them or adjust their properties in the right panel. Drag handles to rotate or scale.</li>
+                        <li><strong>Beams & Bars:</strong> Create straight beams, curved beams, and truss bars.</li>
+                        <li><strong>Supports:</strong> Anchor pinned supports, roller supports (with lines or rollers), and fixed wall clampings.</li>
+                        <li><strong>Loads:</strong> Point forces, distributed loads, and bending moments.
+                            <br><em>Note for Moment:</em> Arc angle is fully adjustable (e.g. 180° for semicircle, 270° three-quarter circle, 90°, or custom degrees).</li>
+                        <li><strong>Annotation & Angles:</strong> Dimension lines, free text, and angle annotations.
+                            <br><em>Note for Angle:</em> Supports circular arcs and right-angle markers with double, single, or dot arrowheads.</li>
+                    </ul>
+                </section>
+                <section class="help-section">
+                    <h3>Export & Saving</h3>
+                    <ul>
+                        <li><strong>PNG Export:</strong> Creates an image with tight white margins.</li>
+                        <li><strong>SVG Export:</strong> Vector graphic in SVG format.</li>
+                        <li><strong>Drawing Code:</strong> Copy text code for saving, sharing, and reloading drawings.</li>
+                    </ul>
+                </section>
+                <section class="help-section">
+                    <h3>Keyboard Shortcuts</h3>
+                    <ul>
+                        <li><kbd>V</kbd> Selection tool</li>
+                        <li><kbd>Ctrl</kbd> + <kbd>C</kbd> Copy selected element(s)</li>
+                        <li><kbd>Ctrl</kbd> + <kbd>V</kbd> Paste copied element(s)</li>
+                        <li><kbd>Ctrl</kbd> + <kbd>D</kbd> Duplicate selected element(s)</li>
+                        <li><kbd>Shift</kbd> / <kbd>Ctrl</kbd> + Click Select multiple elements</li>
+                        <li><kbd>Del</kbd> / <kbd>Backspace</kbd> Delete selected element(s)</li>
+                        <li><kbd>Ctrl</kbd> + <kbd>Z</kbd> Undo</li>
+                        <li><kbd>Ctrl</kbd> + <kbd>Y</kbd> Redo</li>
+                    </ul>
+                </section>`
+            }
+        }
+    };
+
+    function t(key, params) {
+        const lang = (typeof state !== 'undefined' && state.lang) ? state.lang : 'de';
+        const parts = key.split('.');
+        let cur = I18N[lang] || I18N.de;
+        for (const p of parts) {
+            if (cur && cur[p] !== undefined) {
+                cur = cur[p];
+            } else {
+                let fb = I18N.de;
+                for (const fbp of parts) {
+                    if (fb && fb[fbp] !== undefined) fb = fb[fbp];
+                    else { fb = null; break; }
+                }
+                cur = fb !== null ? fb : key;
+                break;
+            }
+        }
+        if (typeof cur === 'string' && params) {
+            let res = cur;
+            for (const [k, v] of Object.entries(params)) {
+                res = res.replace(new RegExp('\\{' + k + '\\}', 'g'), String(v));
+            }
+            return res;
+        }
+        return typeof cur === 'string' ? cur : key;
+    }
+
+    function setLanguage(lang) {
+        if (lang !== 'de' && lang !== 'en') lang = 'de';
+        state.lang = lang;
+        try {
+            localStorage.setItem('stabbalken_lang', lang);
+        } catch (e) {}
+
+        if (document.documentElement) {
+            document.documentElement.lang = lang;
+        }
+
+        // Update static DOM elements
+        document.querySelectorAll('[data-i18n]').forEach(function (el) {
+            const key = el.getAttribute('data-i18n');
+            if (key) el.textContent = t(key);
+        });
+        document.querySelectorAll('[data-i18n-title]').forEach(function (el) {
+            const key = el.getAttribute('data-i18n-title');
+            if (key) el.setAttribute('title', t(key));
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (key) el.setAttribute('placeholder', t(key));
+        });
+        document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+            const key = el.getAttribute('data-i18n-html');
+            if (key) el.innerHTML = t(key);
+        });
+
+        // Update switcher buttons active state
+        const btnDe = document.getElementById('btn-lang-de');
+        const btnEn = document.getElementById('btn-lang-en');
+        if (btnDe && btnDe.classList && btnEn && btnEn.classList) {
+            if (lang === 'de') {
+                btnDe.classList.add('active');
+                btnEn.classList.remove('active');
+            } else {
+                btnEn.classList.add('active');
+                btnDe.classList.remove('active');
+            }
+        }
+
+        // Update dynamic parts
+        updateStatusBar();
+        if (state.selectedIds.size === 1) {
+            const id = Array.from(state.selectedIds)[0];
+            const elem = state.elements.get(id);
+            if (elem) showProperties(elem);
+        } else if (state.selectedIds.size > 1) {
+            showMultiProperties(state.selectedIds.size);
+        } else {
+            hideProperties();
+        }
+    }
+
+    /* ════════════════════════════════════════════════════
        STATE MODULE
        ════════════════════════════════════════════════════ */
 
@@ -197,6 +782,13 @@
         undoStack: [],
         redoStack: [],
         maxUndoSteps: 50,
+        lang: (function () {
+            try {
+                return localStorage.getItem('stabbalken_lang') || 'de';
+            } catch (e) {
+                return 'de';
+            }
+        })(),
     };
 
     function generateId() {
@@ -250,25 +842,25 @@
     }
 
     const ELEMENT_TYPES = {
-        beam: { name: 'Balken', defaults: { length: 200, height: 8, color: '#000000' } },
-        curved_beam: { name: 'Balken (gebogen)', defaults: { radius: 100, startAngle: 0, endAngle: 90, height: 8, color: '#000000' } },
-        bar: { name: 'Stab', defaults: { length: 200, height: 4, radius: 4.5, color: '#000000' } },
-        festlager: { name: 'Festlager', defaults: { size: 22, label: '', labelHorizontal: false, radius: 3, labelPos: 'E', color: '#000000' } },
-        loslager: { name: 'Loslager', defaults: { size: 22, label: '', variant: 'lines', labelHorizontal: false, radius: 3, labelPos: 'E', color: '#000000' } },
-        einspannung: { name: 'Einspannung', defaults: { wallLength: 70, wallWidth: 12, color: '#000000' } },
-        gelenk: { name: 'Gelenk', defaults: { radius: 6, label: '', labelHorizontal: false, labelPos: 'NE', color: '#000000' } },
-        einzelkraft: { name: 'Einzelkraft', defaults: { magnitude: 70, label: 'F', labelHorizontal: false, labelPos: 'NW', color: '#000000' } },
-        streckenlast: { name: 'Streckenlast', defaults: { length: 200, startMag: 50, endMag: 50, label: 'q₀', arrowSpacing: 25, distType: 'linear', formula: '50 * sin(PI * x / L)', labelHorizontal: false, labelPos: 'N', color: '#000000' } },
-        moment: { name: 'Moment', defaults: { radius: 25, label: 'M', direction: 'cw', arcAngle: 270, labelHorizontal: false, labelPos: 'N', color: '#000000' } },
-        dimension: { name: 'Bemaßung', defaults: { length: 200, label: 'a', offset: 8, labelHorizontal: false, labelPos: 'N', color: '#000000' } },
-        angle: { name: 'Winkel', defaults: { radius: 35, startAngle: 0, arcAngle: 90, label: 'α', style: 'arc', arrows: 'both', labelHorizontal: false, labelPos: 'outer', color: '#000000' } },
-        label: { name: 'Text', defaults: { text: 'A', fontSize: 18, labelHorizontal: false, color: '#000000' } },
-        section_cut: { name: 'Schnittlinie', defaults: { length: 80, label: 'A', dir: 'right', labelHorizontal: false, labelPos: 'N', color: '#000000' } },
-        cross_section: { name: 'Querschnitt', defaults: { prefix: 'Schnitt', label: 'A-A', shapes: [{ id: 1, type: 'rectangle', mode: 'solid', lineStyle: 'solid', x: 0, y: 0, w: 40, h: 60 }], labelHorizontal: false, labelPos: 'S', color: '#000000' } },
-        line: { name: 'Linie', defaults: { length: 150, strokeWidth: 1.5, style: 'solid', color: '#000000' } },
-        arrow: { name: 'Pfeil', defaults: { length: 100, strokeWidth: 1.8, style: 'solid', label: '', labelHorizontal: false, labelPos: 'N', color: '#000000' } },
-        coord_system_xy: { name: 'Koordinatensystem (x-y)', defaults: { sizeX: 80, sizeY: 80, labelX: 'x', labelY: 'y', labelHorizontal: false, labelPos: 'E', color: '#000000' } },
-        coord_system_x: { name: 'Koordinatenachse (x)', defaults: { sizeX: 100, labelX: 'x', labelHorizontal: false, labelPos: 'E', color: '#000000' } },
+        beam: { nameKey: 'tools.beam', get name() { return t(this.nameKey); }, defaults: { length: 200, height: 8, color: '#000000' } },
+        curved_beam: { nameKey: 'tools.curvedBeam', get name() { return t(this.nameKey); }, defaults: { radius: 100, startAngle: 0, endAngle: 90, height: 8, color: '#000000' } },
+        bar: { nameKey: 'tools.bar', get name() { return t(this.nameKey); }, defaults: { length: 200, height: 4, radius: 4.5, color: '#000000' } },
+        festlager: { nameKey: 'tools.festlager', get name() { return t(this.nameKey); }, defaults: { size: 22, label: '', labelHorizontal: false, radius: 3, labelPos: 'E', color: '#000000' } },
+        loslager: { nameKey: 'tools.loslager', get name() { return t(this.nameKey); }, defaults: { size: 22, label: '', variant: 'lines', labelHorizontal: false, radius: 3, labelPos: 'E', color: '#000000' } },
+        einspannung: { nameKey: 'tools.einspannung', get name() { return t(this.nameKey); }, defaults: { wallLength: 70, wallWidth: 12, color: '#000000' } },
+        gelenk: { nameKey: 'tools.gelenk', get name() { return t(this.nameKey); }, defaults: { radius: 6, label: '', labelHorizontal: false, labelPos: 'NE', color: '#000000' } },
+        einzelkraft: { nameKey: 'tools.force', get name() { return t(this.nameKey); }, defaults: { magnitude: 70, label: 'F', labelHorizontal: false, labelPos: 'NW', color: '#000000' } },
+        streckenlast: { nameKey: 'tools.distLoad', get name() { return t(this.nameKey); }, defaults: { length: 200, startMag: 50, endMag: 50, label: 'q₀', arrowSpacing: 25, distType: 'linear', formula: '50 * sin(PI * x / L)', labelHorizontal: false, labelPos: 'N', color: '#000000' } },
+        moment: { nameKey: 'tools.moment', get name() { return t(this.nameKey); }, defaults: { radius: 25, label: 'M', direction: 'cw', arcAngle: 270, labelHorizontal: false, labelPos: 'N', color: '#000000' } },
+        dimension: { nameKey: 'tools.dimension', get name() { return t(this.nameKey); }, defaults: { length: 200, label: 'a', offset: 8, labelHorizontal: false, labelPos: 'N', color: '#000000' } },
+        angle: { nameKey: 'tools.angle', get name() { return t(this.nameKey); }, defaults: { radius: 35, startAngle: 0, arcAngle: 90, label: 'α', style: 'arc', arrows: 'both', labelHorizontal: false, labelPos: 'outer', color: '#000000' } },
+        label: { nameKey: 'tools.label', get name() { return t(this.nameKey); }, defaults: { text: 'A', fontSize: 18, labelHorizontal: false, color: '#000000' } },
+        section_cut: { nameKey: 'tools.sectionCut', get name() { return t(this.nameKey); }, defaults: { length: 80, label: 'A', dir: 'right', labelHorizontal: false, labelPos: 'N', color: '#000000' } },
+        cross_section: { nameKey: 'tools.crossSection', get name() { return t(this.nameKey); }, defaults: { prefix: 'Schnitt', label: 'A-A', shapes: [{ id: 1, type: 'rectangle', mode: 'solid', lineStyle: 'solid', x: 0, y: 0, w: 40, h: 60 }], labelHorizontal: false, labelPos: 'S', color: '#000000' } },
+        line: { nameKey: 'tools.line', get name() { return t(this.nameKey); }, defaults: { length: 150, strokeWidth: 1.5, style: 'solid', color: '#000000' } },
+        arrow: { nameKey: 'tools.arrow', get name() { return t(this.nameKey); }, defaults: { length: 100, strokeWidth: 1.8, style: 'solid', label: '', labelHorizontal: false, labelPos: 'N', color: '#000000' } },
+        coord_system_xy: { nameKey: 'tools.coordXy', get name() { return t(this.nameKey); }, defaults: { sizeX: 80, sizeY: 80, labelX: 'x', labelY: 'y', labelHorizontal: false, labelPos: 'E', color: '#000000' } },
+        coord_system_x: { nameKey: 'tools.coordX', get name() { return t(this.nameKey); }, defaults: { sizeX: 100, labelX: 'x', labelHorizontal: false, labelPos: 'E', color: '#000000' } },
     };
 
     function createElementData(type, x, y, rotation, propsOverride, id) {
@@ -1427,6 +2019,26 @@
         propsOnDelete = onDelete;
     }
 
+    function getAlignOptions() {
+        return [
+            { value: 'rotate', label: t('properties.textAlignRotate') },
+            { value: 'horizontal', label: t('properties.textAlignHorizontal') }
+        ];
+    }
+
+    function getPosOptions() {
+        return [
+            { value: 'NW', label: t('properties.posNW') },
+            { value: 'N', label: t('properties.posN') },
+            { value: 'NE', label: t('properties.posNE') },
+            { value: 'E', label: t('properties.posE') },
+            { value: 'SE', label: t('properties.posSE') },
+            { value: 'S', label: t('properties.posS') },
+            { value: 'SW', label: t('properties.posSW') },
+            { value: 'W', label: t('properties.posW') }
+        ];
+    }
+
     function showProperties(elem) {
         if (!propsContainer) return;
         propsContainer.innerHTML = '';
@@ -1438,17 +2050,17 @@
         badge.textContent = td ? td.name : elem.type;
         propsContainer.appendChild(badge);
 
-        addPropGroup(propsContainer, 'Position', function () {
+        addPropGroup(propsContainer, t('properties.groupPosition'), function () {
             const f = document.createDocumentFragment();
-            f.appendChild(makePropRow('X', numInput(elem.x, function (v) { propsOnChange(elem.id, '_x', v); }), 'px'));
-            f.appendChild(makePropRow('Y', numInput(elem.y, function (v) { propsOnChange(elem.id, '_y', v); }), 'px'));
-            f.appendChild(makePropRow('Drehung', numInput(elem.rotation || 0, function (v) { propsOnChange(elem.id, '_rotation', v); }, { min: -360, max: 360, step: 5 }), '°'));
+            f.appendChild(makePropRow(t('properties.lblX'), numInput(elem.x, function (v) { propsOnChange(elem.id, '_x', v); }), 'px'));
+            f.appendChild(makePropRow(t('properties.lblY'), numInput(elem.y, function (v) { propsOnChange(elem.id, '_y', v); }), 'px'));
+            f.appendChild(makePropRow(t('properties.lblRotation'), numInput(elem.rotation || 0, function (v) { propsOnChange(elem.id, '_rotation', v); }, { min: -360, max: 360, step: 5 }), '°'));
             return f;
         });
 
-        addPropGroup(propsContainer, 'Farbe', function () {
+        addPropGroup(propsContainer, t('properties.groupColor'), function () {
             const f = document.createDocumentFragment();
-            f.appendChild(makePropRow('Farbe', colorInput(elem.props.color || '#000000', function (v) {
+            f.appendChild(makePropRow(t('properties.lblColor'), colorInput(elem.props.color || '#000000', function (v) {
                 propsOnChange(elem.id, 'color', v);
             })));
             return f;
@@ -1456,301 +2068,187 @@
 
         switch (elem.type) {
             case 'beam':
-                addPropGroup(propsContainer, 'Balken', function () {
+                addPropGroup(propsContainer, t('properties.groupBeam'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Länge', numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 10, step: 25 }), 'px'));
-                    f.appendChild(makePropRow('Höhe', numInput(elem.props.height || 8, function (v) { propsOnChange(elem.id, 'height', v); }, { min: 2, max: 30, step: 1 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblLength'), numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 10, step: 25 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblHeight'), numInput(elem.props.height || 8, function (v) { propsOnChange(elem.id, 'height', v); }, { min: 2, max: 30, step: 1 }), 'px'));
                     return f;
                 }); break;
             case 'curved_beam':
-                addPropGroup(propsContainer, 'Gebogener Balken', function () {
+                addPropGroup(propsContainer, t('properties.groupCurvedBeam'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Radius', numInput(elem.props.radius, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 10, step: 10 }), 'px'));
-                    f.appendChild(makePropRow('Startwinkel', numInput(elem.props.startAngle, function (v) { propsOnChange(elem.id, 'startAngle', v); }, { min: -360, max: 360, step: 15 }), '°'));
-                    f.appendChild(makePropRow('Endwinkel', numInput(elem.props.endAngle, function (v) { propsOnChange(elem.id, 'endAngle', v); }, { min: -360, max: 360, step: 15 }), '°'));
-                    f.appendChild(makePropRow('Höhe', numInput(elem.props.height || 8, function (v) { propsOnChange(elem.id, 'height', v); }, { min: 2, max: 30, step: 1 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblRadius'), numInput(elem.props.radius, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 10, step: 10 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblStartAngle'), numInput(elem.props.startAngle, function (v) { propsOnChange(elem.id, 'startAngle', v); }, { min: -360, max: 360, step: 15 }), '°'));
+                    f.appendChild(makePropRow(t('properties.lblEndAngle'), numInput(elem.props.endAngle, function (v) { propsOnChange(elem.id, 'endAngle', v); }, { min: -360, max: 360, step: 15 }), '°'));
+                    f.appendChild(makePropRow(t('properties.lblHeight'), numInput(elem.props.height || 8, function (v) { propsOnChange(elem.id, 'height', v); }, { min: 2, max: 30, step: 1 }), 'px'));
                     return f;
                 }); break;
             case 'bar':
-                addPropGroup(propsContainer, 'Stab', function () {
+                addPropGroup(propsContainer, t('properties.groupBar'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Länge', numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 10, step: 25 }), 'px'));
-                    f.appendChild(makePropRow('Höhe', numInput(elem.props.height || 4, function (v) { propsOnChange(elem.id, 'height', v); }, { min: 1, max: 20, step: 1 }), 'px'));
-                    f.appendChild(makePropRow('Gelenkradius', numInput(elem.props.radius !== undefined ? elem.props.radius : 4.5, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 1, max: 20, step: 0.5 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblLength'), numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 10, step: 25 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblHeight'), numInput(elem.props.height || 4, function (v) { propsOnChange(elem.id, 'height', v); }, { min: 1, max: 20, step: 1 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblHingeRadius'), numInput(elem.props.radius !== undefined ? elem.props.radius : 4.5, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 1, max: 20, step: 0.5 }), 'px'));
                     return f;
                 }); break;
             case 'festlager':
-                addPropGroup(propsContainer, 'Lager', function () {
+                addPropGroup(propsContainer, t('properties.groupSupport'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Größe', numInput(elem.props.size, function (v) { propsOnChange(elem.id, 'size', v); }, { min: 10, max: 60, step: 2 }), 'px'));
-                    f.appendChild(makePropRow('Gelenkradius', numInput(elem.props.radius !== undefined ? elem.props.radius : 3, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 1, max: 20, step: 0.5 }), 'px'));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
-                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'E', [
-                        { value: 'NW', label: 'Nordwest' },
-                        { value: 'N', label: 'Norden' },
-                        { value: 'NE', label: 'Nordost' },
-                        { value: 'E', label: 'Osten' },
-                        { value: 'SE', label: 'Südost' },
-                        { value: 'S', label: 'Süden' },
-                        { value: 'SW', label: 'Südwest' },
-                        { value: 'W', label: 'Westen' }
-                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
+                    f.appendChild(makePropRow(t('properties.lblSize'), numInput(elem.props.size, function (v) { propsOnChange(elem.id, 'size', v); }, { min: 10, max: 60, step: 2 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblHingeRadius'), numInput(elem.props.radius !== undefined ? elem.props.radius : 3, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 1, max: 20, step: 0.5 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblLabel'), txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblTextPos'), selInput(elem.props.labelPos || 'E', getPosOptions(), function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
             case 'loslager':
-                addPropGroup(propsContainer, 'Lager', function () {
+                addPropGroup(propsContainer, t('properties.groupSupport'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Größe', numInput(elem.props.size, function (v) { propsOnChange(elem.id, 'size', v); }, { min: 10, max: 60, step: 2 }), 'px'));
-                    f.appendChild(makePropRow('Gelenkradius', numInput(elem.props.radius !== undefined ? elem.props.radius : 3, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 1, max: 20, step: 0.5 }), 'px'));
-                    f.appendChild(makePropRow('Darstellung', selInput(elem.props.variant || 'lines', [
-                        { value: 'lines', label: 'Linien (Gleiter)' },
-                        { value: 'rollers', label: 'Rollen (Kugeln)' }
+                    f.appendChild(makePropRow(t('properties.lblSize'), numInput(elem.props.size, function (v) { propsOnChange(elem.id, 'size', v); }, { min: 10, max: 60, step: 2 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblHingeRadius'), numInput(elem.props.radius !== undefined ? elem.props.radius : 3, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 1, max: 20, step: 0.5 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblVariant'), selInput(elem.props.variant || 'lines', [
+                        { value: 'lines', label: t('properties.variantLines') },
+                        { value: 'rollers', label: t('properties.variantRollers') }
                     ], function (v) { propsOnChange(elem.id, 'variant', v); })));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
-                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'E', [
-                        { value: 'NW', label: 'Nordwest' },
-                        { value: 'N', label: 'Norden' },
-                        { value: 'NE', label: 'Nordost' },
-                        { value: 'E', label: 'Osten' },
-                        { value: 'SE', label: 'Südost' },
-                        { value: 'S', label: 'Süden' },
-                        { value: 'SW', label: 'Südwest' },
-                        { value: 'W', label: 'Westen' }
-                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
+                    f.appendChild(makePropRow(t('properties.lblLabel'), txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblTextPos'), selInput(elem.props.labelPos || 'E', getPosOptions(), function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
             case 'einspannung':
-                addPropGroup(propsContainer, 'Einspannung', function () {
+                addPropGroup(propsContainer, t('properties.groupClamping'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Länge', numInput(elem.props.wallLength, function (v) { propsOnChange(elem.id, 'wallLength', v); }, { min: 20, max: 200, step: 5 }), 'px'));
-                    f.appendChild(makePropRow('Breite', numInput(elem.props.wallWidth, function (v) { propsOnChange(elem.id, 'wallWidth', v); }, { min: 5, max: 30, step: 1 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblLength'), numInput(elem.props.wallLength, function (v) { propsOnChange(elem.id, 'wallLength', v); }, { min: 20, max: 200, step: 5 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblWidth'), numInput(elem.props.wallWidth, function (v) { propsOnChange(elem.id, 'wallWidth', v); }, { min: 5, max: 30, step: 1 }), 'px'));
                     return f;
                 }); break;
             case 'gelenk':
-                addPropGroup(propsContainer, 'Gelenk', function () {
+                addPropGroup(propsContainer, t('properties.groupHinge'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Radius', numInput(elem.props.radius, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 3, max: 20, step: 1 }), 'px'));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
-                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'NE', [
-                        { value: 'NW', label: 'Nordwest' },
-                        { value: 'N', label: 'Norden' },
-                        { value: 'NE', label: 'Nordost' },
-                        { value: 'E', label: 'Osten' },
-                        { value: 'SE', label: 'Südost' },
-                        { value: 'S', label: 'Süden' },
-                        { value: 'SW', label: 'Südwest' },
-                        { value: 'W', label: 'Westen' }
-                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
+                    f.appendChild(makePropRow(t('properties.lblRadius'), numInput(elem.props.radius, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 3, max: 20, step: 1 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblLabel'), txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblTextPos'), selInput(elem.props.labelPos || 'NE', getPosOptions(), function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
             case 'einzelkraft':
-                addPropGroup(propsContainer, 'Kraft', function () {
+                addPropGroup(propsContainer, t('properties.groupForce'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Länge', numInput(elem.props.magnitude, function (v) { propsOnChange(elem.id, 'magnitude', v); }, { min: 20, max: 300, step: 5 }), 'px'));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'F', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
-                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'NW', [
-                        { value: 'NW', label: 'Nordwest' },
-                        { value: 'N', label: 'Norden' },
-                        { value: 'NE', label: 'Nordost' },
-                        { value: 'E', label: 'Osten' },
-                        { value: 'SE', label: 'Südost' },
-                        { value: 'S', label: 'Süden' },
-                        { value: 'SW', label: 'Südwest' },
-                        { value: 'W', label: 'Westen' }
-                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
+                    f.appendChild(makePropRow(t('properties.lblLength'), numInput(elem.props.magnitude, function (v) { propsOnChange(elem.id, 'magnitude', v); }, { min: 20, max: 300, step: 5 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblLabel'), txtInput(elem.props.label || 'F', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblTextPos'), selInput(elem.props.labelPos || 'NW', getPosOptions(), function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
             case 'streckenlast':
-                addPropGroup(propsContainer, 'Streckenlast', function () {
+                addPropGroup(propsContainer, t('properties.groupDistLoad'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Länge', numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 25, step: 25 }), 'px'));
-                    f.appendChild(makePropRow('Verteilung', selInput(elem.props.distType || 'linear', [
-                        { value: 'linear', label: 'Linear' },
-                        { value: 'sine', label: 'Sinus' },
-                        { value: 'parabola', label: 'Parabel' },
-                        { value: 'custom', label: 'Formel' }
+                    f.appendChild(makePropRow(t('properties.lblLength'), numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 25, step: 25 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblDistribution'), selInput(elem.props.distType || 'linear', [
+                        { value: 'linear', label: t('properties.distLinear') },
+                        { value: 'sine', label: t('properties.distSine') },
+                        { value: 'parabola', label: t('properties.distParabola') },
+                        { value: 'custom', label: t('properties.distCustom') }
                     ], function (v) {
                         propsOnChange(elem.id, 'distType', v);
                         showProperties(elem);
                     })));
                     if (!elem.props.distType || elem.props.distType === 'linear') {
-                        f.appendChild(makePropRow('Start', numInput(elem.props.startMag, function (v) { propsOnChange(elem.id, 'startMag', v); }, { min: 0, step: 5 }), 'px'));
-                        f.appendChild(makePropRow('Ende', numInput(elem.props.endMag, function (v) { propsOnChange(elem.id, 'endMag', v); }, { min: 0, step: 5 }), 'px'));
+                        f.appendChild(makePropRow(t('properties.lblStart'), numInput(elem.props.startMag, function (v) { propsOnChange(elem.id, 'startMag', v); }, { min: 0, step: 5 }), 'px'));
+                        f.appendChild(makePropRow(t('properties.lblEnd'), numInput(elem.props.endMag, function (v) { propsOnChange(elem.id, 'endMag', v); }, { min: 0, step: 5 }), 'px'));
                     } else if (elem.props.distType === 'sine' || elem.props.distType === 'parabola') {
-                        f.appendChild(makePropRow('Amplitude', numInput(elem.props.startMag !== undefined ? elem.props.startMag : 50, function (v) { propsOnChange(elem.id, 'startMag', v); }, { min: 0, step: 5 }), 'px'));
+                        f.appendChild(makePropRow(t('properties.lblAmplitude'), numInput(elem.props.startMag !== undefined ? elem.props.startMag : 50, function (v) { propsOnChange(elem.id, 'startMag', v); }, { min: 0, step: 5 }), 'px'));
                     } else if (elem.props.distType === 'custom') {
-                        f.appendChild(makePropRow('Formel', txtInput(elem.props.formula || '50 * sin(PI * x / L)', function (v) { propsOnChange(elem.id, 'formula', v); })));
+                        f.appendChild(makePropRow(t('properties.lblFormula'), txtInput(elem.props.formula || '50 * sin(PI * x / L)', function (v) { propsOnChange(elem.id, 'formula', v); })));
                     }
-                    f.appendChild(makePropRow('Abstand', numInput(elem.props.arrowSpacing || 25, function (v) { propsOnChange(elem.id, 'arrowSpacing', v); }, { min: 10, max: 100, step: 5 }), 'px'));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'q₀', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
-                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'N', [
-                        { value: 'NW', label: 'Nordwest' },
-                        { value: 'N', label: 'Norden' },
-                        { value: 'NE', label: 'Nordost' },
-                        { value: 'E', label: 'Osten' },
-                        { value: 'SE', label: 'Südost' },
-                        { value: 'S', label: 'Süden' },
-                        { value: 'SW', label: 'Südwest' },
-                        { value: 'W', label: 'Westen' }
-                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
+                    f.appendChild(makePropRow(t('properties.lblSpacing'), numInput(elem.props.arrowSpacing || 25, function (v) { propsOnChange(elem.id, 'arrowSpacing', v); }, { min: 10, max: 100, step: 5 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblLabel'), txtInput(elem.props.label || 'q₀', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblTextPos'), selInput(elem.props.labelPos || 'N', getPosOptions(), function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
             case 'moment':
-                addPropGroup(propsContainer, 'Moment', function () {
+                addPropGroup(propsContainer, t('properties.groupMoment'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Radius', numInput(elem.props.radius, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 10, max: 80, step: 5 }), 'px'));
-                    f.appendChild(makePropRow('Öffnungswinkel', numInput(elem.props.arcAngle !== undefined ? elem.props.arcAngle : 270, function (v) { propsOnChange(elem.id, 'arcAngle', v); }, { min: 10, max: 360, step: 5 }), '°'));
-                    f.appendChild(makePropRow('Vorlagen', selInput(String(elem.props.arcAngle || 270), [
-                        { value: '180', label: '180° (Halbkreis)' },
-                        { value: '270', label: '270° (3/4 Kreis)' },
-                        { value: '90', label: '90° (Viertelkreis)' },
-                        { value: '360', label: '360° (Vollkreis)' }
+                    f.appendChild(makePropRow(t('properties.lblRadius'), numInput(elem.props.radius, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 10, max: 80, step: 5 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblArcAngle'), numInput(elem.props.arcAngle !== undefined ? elem.props.arcAngle : 270, function (v) { propsOnChange(elem.id, 'arcAngle', v); }, { min: 10, max: 360, step: 5 }), '°'));
+                    f.appendChild(makePropRow(t('properties.lblPresets'), selInput(String(elem.props.arcAngle || 270), [
+                        { value: '180', label: t('properties.preset180') },
+                        { value: '270', label: t('properties.preset270') },
+                        { value: '90', label: t('properties.preset90') },
+                        { value: '360', label: t('properties.preset360') }
                     ], function (v) { propsOnChange(elem.id, 'arcAngle', parseFloat(v)); })));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'M', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
-                    f.appendChild(makePropRow('Richtung', selInput(elem.props.direction || 'cw', [
-                        { value: 'cw', label: 'Uhrzeigersinn' }, { value: 'ccw', label: 'Gegen Uhrzeigersinn' },
+                    f.appendChild(makePropRow(t('properties.lblLabel'), txtInput(elem.props.label || 'M', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow(t('properties.lblDirection'), selInput(elem.props.direction || 'cw', [
+                        { value: 'cw', label: t('properties.dirCw') }, { value: 'ccw', label: t('properties.dirCcw') },
                     ], function (v) { propsOnChange(elem.id, 'direction', v); })));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
-                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'N', [
-                        { value: 'NW', label: 'Nordwest' },
-                        { value: 'N', label: 'Norden' },
-                        { value: 'NE', label: 'Nordost' },
-                        { value: 'E', label: 'Osten' },
-                        { value: 'SE', label: 'Südost' },
-                        { value: 'S', label: 'Süden' },
-                        { value: 'SW', label: 'Südwest' },
-                        { value: 'W', label: 'Westen' }
-                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblTextPos'), selInput(elem.props.labelPos || 'N', getPosOptions(), function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
             case 'angle':
-                addPropGroup(propsContainer, 'Winkel', function () {
+                addPropGroup(propsContainer, t('properties.groupAngle'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Typ', selInput(elem.props.style || 'arc', [
-                        { value: 'arc', label: 'Bogen (Kreisbogen)' },
-                        { value: 'square', label: 'Rechtwinklig (90° Eck)' }
+                    f.appendChild(makePropRow(t('properties.lblType'), selInput(elem.props.style || 'arc', [
+                        { value: 'arc', label: t('properties.angleArc') },
+                        { value: 'square', label: t('properties.angleSquare') }
                     ], function (v) { propsOnChange(elem.id, 'style', v); })));
-                    f.appendChild(makePropRow('Winkel', numInput(elem.props.arcAngle !== undefined ? elem.props.arcAngle : 90, function (v) { propsOnChange(elem.id, 'arcAngle', v); }, { min: 5, max: 360, step: 5 }), '°'));
-                    f.appendChild(makePropRow('Startwinkel', numInput(elem.props.startAngle || 0, function (v) { propsOnChange(elem.id, 'startAngle', v); }, { min: -360, max: 360, step: 5 }), '°'));
-                    f.appendChild(makePropRow('Radius', numInput(elem.props.radius || 35, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 10, max: 150, step: 5 }), 'px'));
-                    f.appendChild(makePropRow('Pfeile', selInput(elem.props.arrows || 'both', [
-                        { value: 'both', label: 'Beidseitig (Doppelpfeil)' },
-                        { value: 'end', label: 'Am Ende' },
-                        { value: 'start', label: 'Am Anfang' },
-                        { value: 'dot', label: 'Punkt (Rechter Winkel)' },
-                        { value: 'none', label: 'Keine' }
+                    f.appendChild(makePropRow(t('properties.lblArcAngle'), numInput(elem.props.arcAngle !== undefined ? elem.props.arcAngle : 90, function (v) { propsOnChange(elem.id, 'arcAngle', v); }, { min: 5, max: 360, step: 5 }), '°'));
+                    f.appendChild(makePropRow(t('properties.lblStartAngle'), numInput(elem.props.startAngle || 0, function (v) { propsOnChange(elem.id, 'startAngle', v); }, { min: -360, max: 360, step: 5 }), '°'));
+                    f.appendChild(makePropRow(t('properties.lblRadius'), numInput(elem.props.radius || 35, function (v) { propsOnChange(elem.id, 'radius', v); }, { min: 10, max: 150, step: 5 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblArrows'), selInput(elem.props.arrows || 'both', [
+                        { value: 'both', label: t('properties.arrowsBoth') },
+                        { value: 'end', label: t('properties.arrowsEnd') },
+                        { value: 'start', label: t('properties.arrowsStart') },
+                        { value: 'dot', label: t('properties.arrowsDot') },
+                        { value: 'none', label: t('properties.arrowsNone') }
                     ], function (v) { propsOnChange(elem.id, 'arrows', v); })));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'α', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblLabel'), txtInput(elem.props.label || 'α', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
                     return f;
                 }); break;
             case 'dimension':
-                addPropGroup(propsContainer, 'Bemaßung', function () {
+                addPropGroup(propsContainer, t('properties.groupDimension'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Länge', numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 25, step: 25 }), 'px'));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || 'a', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
-                    f.appendChild(makePropRow('Offset', numInput(elem.props.offset || 8, function (v) { propsOnChange(elem.id, 'offset', v); }, { min: 2, max: 30, step: 1 }), 'px'));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
-                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'N', [
-                        { value: 'NW', label: 'Nordwest' },
-                        { value: 'N', label: 'Norden' },
-                        { value: 'NE', label: 'Nordost' },
-                        { value: 'E', label: 'Osten' },
-                        { value: 'SE', label: 'Südost' },
-                        { value: 'S', label: 'Süden' },
-                        { value: 'SW', label: 'Südwest' },
-                        { value: 'W', label: 'Westen' }
-                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
+                    f.appendChild(makePropRow(t('properties.lblLength'), numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 25, step: 25 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblLabel'), txtInput(elem.props.label || 'a', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow(t('properties.lblOffset'), numInput(elem.props.offset || 8, function (v) { propsOnChange(elem.id, 'offset', v); }, { min: 2, max: 30, step: 1 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblTextPos'), selInput(elem.props.labelPos || 'N', getPosOptions(), function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
             case 'label':
-                addPropGroup(propsContainer, 'Text', function () {
+                addPropGroup(propsContainer, t('properties.groupText'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Text', txtInput(elem.props.text || 'A', function (v) { propsOnChange(elem.id, 'text', v); })));
-                    f.appendChild(makePropRow('Größe', numInput(elem.props.fontSize || 18, function (v) { propsOnChange(elem.id, 'fontSize', v); }, { min: 8, max: 72, step: 1 }), 'px'));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblLabel'), txtInput(elem.props.text || 'A', function (v) { propsOnChange(elem.id, 'text', v); })));
+                    f.appendChild(makePropRow(t('properties.lblFontSize'), numInput(elem.props.fontSize || 18, function (v) { propsOnChange(elem.id, 'fontSize', v); }, { min: 8, max: 72, step: 1 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
                     return f;
                 }); break;
             case 'section_cut':
-                addPropGroup(propsContainer, 'Schnittlinie', function () {
+                addPropGroup(propsContainer, t('properties.groupSectionCut'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Länge', numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 20, max: 200, step: 5 }), 'px'));
-                    f.appendChild(makePropRow('Bez.', txtInput(elem.props.label || 'A', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
-                    f.appendChild(makePropRow('Richtung', selInput(elem.props.dir || 'right', [
-                        { value: 'right', label: 'Rechts (►)' },
-                        { value: 'left', label: 'Links (◄)' }
+                    f.appendChild(makePropRow(t('properties.lblLength'), numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 20, max: 200, step: 5 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblLabel'), txtInput(elem.props.label || 'A', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow(t('properties.lblCutDirection'), selInput(elem.props.dir || 'right', [
+                        { value: 'right', label: t('properties.dirRight') },
+                        { value: 'left', label: t('properties.dirLeft') }
                     ], function (v) { propsOnChange(elem.id, 'dir', v); })));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
-                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'N', [
-                        { value: 'NW', label: 'Nordwest' },
-                        { value: 'N', label: 'Norden' },
-                        { value: 'NE', label: 'Nordost' },
-                        { value: 'E', label: 'Osten' },
-                        { value: 'SE', label: 'Südost' },
-                        { value: 'S', label: 'Süden' },
-                        { value: 'SW', label: 'Südwest' },
-                        { value: 'W', label: 'Westen' }
-                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblTextPos'), selInput(elem.props.labelPos || 'N', getPosOptions(), function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
             case 'cross_section':
-                addPropGroup(propsContainer, 'Querschnitts-Zeichnung', function () {
+                addPropGroup(propsContainer, t('properties.groupCrossSection'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Präfix', txtInput(elem.props.prefix !== undefined ? elem.props.prefix : 'Schnitt', function (v) { propsOnChange(elem.id, 'prefix', v); }), null, 'Bezeichnung vor dem Schnitt (z.B. "Schnitt", "Querschnitt", "Profil" oder leer lassen)'));
-                    f.appendChild(makePropRow('Titel', txtInput(elem.props.label || 'A-A', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
-                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'S', [
-                        { value: 'NW', label: 'Nordwest' },
-                        { value: 'N', label: 'Norden' },
-                        { value: 'NE', label: 'Nordost' },
-                        { value: 'E', label: 'Osten' },
-                        { value: 'SE', label: 'Südost' },
-                        { value: 'S', label: 'Süden' },
-                        { value: 'SW', label: 'Südwest' },
-                        { value: 'W', label: 'Westen' }
-                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
+                    f.appendChild(makePropRow(t('properties.lblPrefix'), txtInput(elem.props.prefix !== undefined ? elem.props.prefix : 'Schnitt', function (v) { propsOnChange(elem.id, 'prefix', v); }), null, t('properties.cutPrefixTooltip')));
+                    f.appendChild(makePropRow(t('properties.lblTitle'), txtInput(elem.props.label || 'A-A', function (v) { propsOnChange(elem.id, 'label', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblTextPos'), selInput(elem.props.labelPos || 'S', getPosOptions(), function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     const listTitle = document.createElement('div');
                     listTitle.className = 'prop-group-title';
                     listTitle.style.marginTop = '12px';
-                    listTitle.textContent = 'Formen (Zusammengesetzt)';
+                    listTitle.textContent = t('properties.groupCompositeShapes');
                     f.appendChild(listTitle);
                     const shapes = elem.props.shapes || [];
                     shapes.forEach((shape, index) => {
@@ -1782,14 +2280,15 @@
                         label.style.fontSize = '11px';
                         label.style.marginBottom = '6px';
                         label.style.color = '#475569';
-                        label.textContent = `Form #${index + 1}: ${shape.type === 'rectangle' ? 'Rechteck' : shape.type === 'circle' ? 'Kreis' : 'Dreieck'}`;
+                        const typeName = shape.type === 'rectangle' ? t('properties.shapeRect') : shape.type === 'circle' ? t('properties.shapeCircle') : t('properties.shapeTriangle');
+                        label.textContent = t('properties.shapeHeader', { n: index + 1, type: typeName });
                         box.appendChild(label);
                         const r1 = document.createElement('div');
                         r1.className = 'prop-row';
                         const typeSel = selInput(shape.type, [
-                            { value: 'rectangle', label: 'Rechteck' },
-                            { value: 'triangle', label: 'Dreieck' },
-                            { value: 'circle', label: 'Kreis' }
+                            { value: 'rectangle', label: t('properties.shapeRect') },
+                            { value: 'triangle', label: t('properties.shapeTriangle') },
+                            { value: 'circle', label: t('properties.shapeCircle') }
                         ], function (val) {
                             shape.type = val;
                             if (val === 'circle') shape.r = 15;
@@ -1799,8 +2298,8 @@
                             showProperties(elem);
                         });
                         const modeSel = selInput(shape.mode || 'solid', [
-                            { value: 'solid', label: 'Voll (Solid)' },
-                            { value: 'hole', label: 'Ausschnitt (Loch)' }
+                            { value: 'solid', label: t('properties.modeSolid') },
+                            { value: 'hole', label: t('properties.modeHole') }
                         ], function (val) {
                             shape.mode = val;
                             if (val === 'hole' && !shape.lineStyle) shape.lineStyle = 'dashed';
@@ -1815,15 +2314,15 @@
                         rLineStyle.className = 'prop-row';
                         const defaultStyle = shape.mode === 'hole' ? 'dashed' : 'solid';
                         const styleSel = selInput(shape.lineStyle || defaultStyle, [
-                            { value: 'dashed', label: 'Gestrichelt (Dashed)' },
-                            { value: 'solid', label: 'Durchgezogen (Solid)' },
-                            { value: 'dotted', label: 'Gepunktet (Dotted)' },
-                            { value: 'dashdot', label: 'Strichpunkt (Dash-Dot)' }
+                            { value: 'dashed', label: t('properties.lineDashed') },
+                            { value: 'solid', label: t('properties.lineSolid') },
+                            { value: 'dotted', label: t('properties.lineDotted') },
+                            { value: 'dashdot', label: t('properties.lineDashDot') }
                         ], function (val) {
                             shape.lineStyle = val;
                             propsOnChange(elem.id, 'shapes', shapes);
                         });
-                        rLineStyle.appendChild(makePropRow('Linienstil', styleSel));
+                        rLineStyle.appendChild(makePropRow(t('properties.lblLineStyle'), styleSel));
                         box.appendChild(rLineStyle);
 
                         const r2 = document.createElement('div');
@@ -1849,21 +2348,19 @@
                             const rInput = numInput(shape.r || 15, function (val) {
                                 shape.r = val;
                                 propsOnChange(elem.id, 'shapes', shapes);
-                            });
-                            r3.appendChild(makePropRow('Radius', rInput, 'px'));
+                            }, { min: 1 });
+                            r3.appendChild(makePropRow('r', rInput, 'px'));
                         } else {
-                            const wLabel = shape.type === 'rectangle' ? 'Breite b' : 'Basis b';
-                            const hLabel = shape.type === 'rectangle' ? 'Höhe h' : 'Höhe h';
                             const wInput = numInput(shape.w || 30, function (val) {
                                 shape.w = val;
                                 propsOnChange(elem.id, 'shapes', shapes);
-                            });
-                            const hInput = numInput(shape.h || 30, function (val) {
+                            }, { min: 1 });
+                            const hInput = numInput(shape.h || 40, function (val) {
                                 shape.h = val;
                                 propsOnChange(elem.id, 'shapes', shapes);
-                            });
-                            r3.appendChild(makePropRow(wLabel, wInput, 'px'));
-                            r3.appendChild(makePropRow(hLabel, hInput, 'px'));
+                            }, { min: 1 });
+                            r3.appendChild(makePropRow('w', wInput, 'px'));
+                            r3.appendChild(makePropRow('h', hInput, 'px'));
                         }
                         box.appendChild(r3);
                         f.appendChild(box);
@@ -1873,7 +2370,7 @@
                     addBtn.style.width = '100%';
                     addBtn.style.marginTop = '8px';
                     addBtn.style.marginBottom = '12px';
-                    addBtn.textContent = '+ Form hinzufügen';
+                    addBtn.textContent = t('properties.addShape');
                     addBtn.addEventListener('click', function () {
                         const nextId = shapes.length > 0 ? Math.max(...shapes.map(s => s.id)) + 1 : 1;
                         shapes.push({ id: nextId, type: 'rectangle', mode: 'solid', lineStyle: 'solid', x: 0, y: 0, w: 30, h: 40 });
@@ -1884,93 +2381,57 @@
                     return f;
                 }); break;
             case 'line':
-                addPropGroup(propsContainer, 'Linie', function () {
+                addPropGroup(propsContainer, t('properties.groupLine'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Länge', numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 10, step: 25 }), 'px'));
-                    f.appendChild(makePropRow('Stärke', numInput(elem.props.strokeWidth || 1.5, function (v) { propsOnChange(elem.id, 'strokeWidth', v); }, { min: 0.5, max: 15, step: 0.5 }), 'px'));
-                    f.appendChild(makePropRow('Stil', selInput(elem.props.style || 'solid', [
-                        { value: 'solid', label: 'Durchgehend' },
-                        { value: 'dashed', label: 'Gestrichelt' },
-                        { value: 'dotted', label: 'Gepunktet' }
+                    f.appendChild(makePropRow(t('properties.lblLength'), numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 10, step: 25 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblThickness'), numInput(elem.props.strokeWidth || 1.5, function (v) { propsOnChange(elem.id, 'strokeWidth', v); }, { min: 0.5, max: 15, step: 0.5 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblStyle'), selInput(elem.props.style || 'solid', [
+                        { value: 'solid', label: t('properties.lineSolid') },
+                        { value: 'dashed', label: t('properties.lineDashed') },
+                        { value: 'dotted', label: t('properties.lineDotted') }
                     ], function (v) { propsOnChange(elem.id, 'style', v); })));
                     return f;
                 }); break;
             case 'arrow':
-                addPropGroup(propsContainer, 'Pfeil', function () {
+                addPropGroup(propsContainer, t('properties.groupArrow'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Länge', numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 10, step: 25 }), 'px'));
-                    f.appendChild(makePropRow('Stärke', numInput(elem.props.strokeWidth || 1.8, function (v) { propsOnChange(elem.id, 'strokeWidth', v); }, { min: 0.5, max: 15, step: 0.5 }), 'px'));
-                    f.appendChild(makePropRow('Stil', selInput(elem.props.style || 'solid', [
-                        { value: 'solid', label: 'Durchgehend' },
-                        { value: 'dashed', label: 'Gestrichelt' },
-                        { value: 'dotted', label: 'Gepunktet' }
+                    f.appendChild(makePropRow(t('properties.lblLength'), numInput(elem.props.length, function (v) { propsOnChange(elem.id, 'length', v); }, { min: 10, step: 25 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblThickness'), numInput(elem.props.strokeWidth || 1.8, function (v) { propsOnChange(elem.id, 'strokeWidth', v); }, { min: 0.5, max: 15, step: 0.5 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblStyle'), selInput(elem.props.style || 'solid', [
+                        { value: 'solid', label: t('properties.lineSolid') },
+                        { value: 'dashed', label: t('properties.lineDashed') },
+                        { value: 'dotted', label: t('properties.lineDotted') }
                     ], function (v) { propsOnChange(elem.id, 'style', v); })));
-                    f.appendChild(makePropRow('Beschr.', txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); })));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
-                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'N', [
-                        { value: 'NW', label: 'Nordwest' },
-                        { value: 'N', label: 'Norden' },
-                        { value: 'NE', label: 'Nordost' },
-                        { value: 'E', label: 'Osten' },
-                        { value: 'SE', label: 'Südost' },
-                        { value: 'S', label: 'Süden' },
-                        { value: 'SW', label: 'Südwest' },
-                        { value: 'W', label: 'Westen' }
-                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
+                    f.appendChild(makePropRow(t('properties.lblLabel'), txtInput(elem.props.label || '', function (v) { propsOnChange(elem.id, 'label', v); })));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblTextPos'), selInput(elem.props.labelPos || 'N', getPosOptions(), function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
             case 'coord_system_xy':
-                addPropGroup(propsContainer, 'Koordinatensystem (x-y)', function () {
+                addPropGroup(propsContainer, t('properties.groupCoordXy'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Länge X', numInput(elem.props.sizeX || 80, function (v) { propsOnChange(elem.id, 'sizeX', v); }, { min: 10, step: 10 }), 'px'));
-                    f.appendChild(makePropRow('Länge Y', numInput(elem.props.sizeY || 80, function (v) { propsOnChange(elem.id, 'sizeY', v); }, { min: 10, step: 10 }), 'px'));
-                    f.appendChild(makePropRow('Label X', txtInput(elem.props.labelX !== undefined ? elem.props.labelX : 'x', function (v) { propsOnChange(elem.id, 'labelX', v); }), null, MATH_LABEL_TOOLTIP));
-                    f.appendChild(makePropRow('Label Y', txtInput(elem.props.labelY !== undefined ? elem.props.labelY : 'y', function (v) { propsOnChange(elem.id, 'labelY', v); }), null, MATH_LABEL_TOOLTIP));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
-                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'E', [
-                        { value: 'NW', label: 'Nordwest' },
-                        { value: 'N', label: 'Norden' },
-                        { value: 'NE', label: 'Nordost' },
-                        { value: 'E', label: 'Osten' },
-                        { value: 'SE', label: 'Südost' },
-                        { value: 'S', label: 'Süden' },
-                        { value: 'SW', label: 'Südwest' },
-                        { value: 'W', label: 'Westen' }
-                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
+                    f.appendChild(makePropRow(t('properties.lblSizeX'), numInput(elem.props.sizeX || 80, function (v) { propsOnChange(elem.id, 'sizeX', v); }, { min: 10, step: 10 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblSizeY'), numInput(elem.props.sizeY || 80, function (v) { propsOnChange(elem.id, 'sizeY', v); }, { min: 10, step: 10 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblLabelX'), txtInput(elem.props.labelX !== undefined ? elem.props.labelX : 'x', function (v) { propsOnChange(elem.id, 'labelX', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow(t('properties.lblLabelY'), txtInput(elem.props.labelY !== undefined ? elem.props.labelY : 'y', function (v) { propsOnChange(elem.id, 'labelY', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblTextPos'), selInput(elem.props.labelPos || 'E', getPosOptions(), function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
             case 'coord_system_x':
-                addPropGroup(propsContainer, 'Koordinatenachse (x)', function () {
+                addPropGroup(propsContainer, t('properties.groupCoordX'), function () {
                     const f = document.createDocumentFragment();
-                    f.appendChild(makePropRow('Länge', numInput(elem.props.sizeX || 100, function (v) { propsOnChange(elem.id, 'sizeX', v); }, { min: 10, step: 10 }), 'px'));
-                    f.appendChild(makePropRow('Label', txtInput(elem.props.labelX !== undefined ? elem.props.labelX : 'x', function (v) { propsOnChange(elem.id, 'labelX', v); }), null, MATH_LABEL_TOOLTIP));
-                    f.appendChild(makePropRow('Textausricht.', selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', [
-                        { value: 'rotate', label: 'Mit Element drehen' },
-                        { value: 'horizontal', label: 'Horizontal halten' }
-                    ], function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
-                    f.appendChild(makePropRow('Textposition', selInput(elem.props.labelPos || 'E', [
-                        { value: 'NW', label: 'Nordwest' },
-                        { value: 'N', label: 'Norden' },
-                        { value: 'NE', label: 'Nordost' },
-                        { value: 'E', label: 'Osten' },
-                        { value: 'SE', label: 'Südost' },
-                        { value: 'S', label: 'Süden' },
-                        { value: 'SW', label: 'Südwest' },
-                        { value: 'W', label: 'Westen' }
-                    ], function (v) { propsOnChange(elem.id, 'labelPos', v); })));
+                    f.appendChild(makePropRow(t('properties.lblLength'), numInput(elem.props.sizeX || 100, function (v) { propsOnChange(elem.id, 'sizeX', v); }, { min: 10, step: 10 }), 'px'));
+                    f.appendChild(makePropRow(t('properties.lblLabel'), txtInput(elem.props.labelX !== undefined ? elem.props.labelX : 'x', function (v) { propsOnChange(elem.id, 'labelX', v); }), null, MATH_LABEL_TOOLTIP));
+                    f.appendChild(makePropRow(t('properties.lblTextAlign'), selInput(elem.props.labelHorizontal ? 'horizontal' : 'rotate', getAlignOptions(), function (v) { propsOnChange(elem.id, 'labelHorizontal', v === 'horizontal'); })));
+                    f.appendChild(makePropRow(t('properties.lblTextPos'), selInput(elem.props.labelPos || 'E', getPosOptions(), function (v) { propsOnChange(elem.id, 'labelPos', v); })));
                     return f;
                 }); break;
         }
 
         const del = document.createElement('button');
         del.className = 'prop-btn-danger';
-        del.textContent = '✕ Element löschen';
+        del.textContent = t('properties.deleteElement');
         del.addEventListener('click', function () { if (propsOnDelete) propsOnDelete(elem.id); });
         propsContainer.appendChild(del);
     }
@@ -1981,19 +2442,19 @@
 
         var badge = document.createElement('div');
         badge.className = 'prop-type-badge';
-        badge.textContent = count + ' Elemente ausgewählt';
+        badge.textContent = t('properties.multiSelectionCount', { n: count });
         propsContainer.appendChild(badge);
 
         var group = document.createElement('div');
         group.className = 'prop-group';
-        var t = document.createElement('div');
-        t.className = 'prop-group-title';
-        t.textContent = 'Mehrfachauswahl';
-        group.appendChild(t);
+        var tEl = document.createElement('div');
+        tEl.className = 'prop-group-title';
+        tEl.textContent = t('properties.multiSelectionTitle');
+        group.appendChild(tEl);
         var info = document.createElement('p');
         info.className = 'hint-text';
         info.style.marginTop = '6px';
-        info.textContent = 'Nutzen Sie Strg+C & Strg+V zum Kopieren/Einfügen oder ziehen Sie die Elemente gemeinsam.';
+        info.textContent = t('properties.multiSelectionHint');
         group.appendChild(info);
         propsContainer.appendChild(group);
 
@@ -2468,6 +2929,8 @@
         setupKeyboard();
         setupShareBar();
 
+        setLanguage(state.lang);
+
         window.addEventListener('resize', function () {
             const r = appCanvasContainer.getBoundingClientRect();
             state.canvasWidth = r.width || 1600; state.canvasHeight = r.height || 1000;
@@ -2746,30 +3209,30 @@
 
         box.innerHTML = `
         <div class="modal-header">
-            <h2 class="modal-title">Zufälliges Aufgabenbild generieren</h2>
-            <p class="modal-subtitle">Geben Sie die Parameter für die Generierung ein.</p>
+            <h2 class="modal-title">${t('randomDialog.title')}</h2>
+            <p class="modal-subtitle">${t('randomDialog.subtitle')}</p>
         </div>
         <div class="modal-body">
             <div class="modal-row">
-                <span class="modal-label">Anzahl Balken:</span>
+                <span class="modal-label">${t('randomDialog.beams')}</span>
                 <input type="number" id="rand-beams" class="modal-input" value="2" min="1" max="10" step="1">
             </div>
             <div class="modal-row">
-                <span class="modal-label">Anzahl Pendelstäbe:</span>
+                <span class="modal-label">${t('randomDialog.bars')}</span>
                 <input type="number" id="rand-bars" class="modal-input" value="1" min="0" max="10" step="1">
             </div>
             <div class="modal-row">
-                <span class="modal-label">Wertigkeit der Lager:</span>
+                <span class="modal-label">${t('randomDialog.bearings')}</span>
                 <input type="number" id="rand-bearings" class="modal-input" value="3" min="1" max="15" step="1">
             </div>
             <div class="modal-row">
-                <span class="modal-label">Anzahl Lasten:</span>
+                <span class="modal-label">${t('randomDialog.loads')}</span>
                 <input type="number" id="rand-loads" class="modal-input" value="2" min="0" max="10" step="1">
             </div>
         </div>
         <div class="modal-actions">
-            <button id="rand-cancel" class="modal-btn modal-btn-cancel">Abbrechen</button>
-            <button id="rand-ok" class="modal-btn modal-btn-ok">Generieren</button>
+            <button id="rand-cancel" class="modal-btn modal-btn-cancel">${t('randomDialog.cancel')}</button>
+            <button id="rand-ok" class="modal-btn modal-btn-ok">${t('randomDialog.generate')}</button>
         </div>
     `;
 
@@ -2827,7 +3290,7 @@
         var u = document.getElementById('btn-undo'); if (u) u.addEventListener('click', undo);
         var r = document.getElementById('btn-redo'); if (r) r.addEventListener('click', redo);
         var gt = document.getElementById('grid-toggle'); if (gt) gt.addEventListener('change', function (e) { state.showGrid = e.target.checked; setGridVisible(state.showGrid); });
-        var gs = document.getElementById('grid-size'); if (gs) gs.addEventListener('input', function (e) { var v = parseInt(e.target.value, 10); if (v >= 5 && v <= 100) { state.gridSize = v; updateGridPattern(); var sg = document.getElementById('status-grid'); if (sg) sg.textContent = 'Raster: ' + v + ' px'; } });
+        var gs = document.getElementById('grid-size'); if (gs) gs.addEventListener('input', function (e) { var v = parseInt(e.target.value, 10); if (v >= 5 && v <= 100) { state.gridSize = v; updateGridPattern(); var sg = document.getElementById('status-grid'); if (sg) sg.textContent = t('status.grid', { size: v }); } });
         var st = document.getElementById('snap-toggle'); if (st) st.addEventListener('change', function (e) { state.snapEnabled = e.target.checked; });
         var del = document.getElementById('btn-delete'); if (del) del.addEventListener('click', handleDeleteSelected);
         var es = document.getElementById('btn-export-svg'); if (es) es.addEventListener('click', function () { exportSVG(appSvg, state.elements); });
@@ -2845,6 +3308,11 @@
         if (helpModal) {
             helpModal.addEventListener('click', function (e) { if (e.target === helpModal) helpModal.style.display = 'none'; });
         }
+
+        var btnDe = document.getElementById('btn-lang-de');
+        if (btnDe) btnDe.addEventListener('click', function () { setLanguage('de'); });
+        var btnEn = document.getElementById('btn-lang-en');
+        if (btnEn) btnEn.addEventListener('click', function () { setLanguage('en'); });
     }
 
     function setupStatusBar() {
@@ -2860,7 +3328,16 @@
         var e = document.getElementById('status-elements');
         if (e) {
             var selCount = state.selectedIds.size;
-            e.textContent = state.elements.size + ' Element' + (state.elements.size !== 1 ? 'e' : '') + (selCount > 0 ? ' (' + selCount + ' ausgewählt)' : '');
+            var count = state.elements.size;
+            var text = count === 1 ? t('status.elementsSingle') : t('status.elementsPlural', { n: count });
+            if (selCount > 0) {
+                text += ' ' + t('status.elementsSelected', { n: selCount });
+            }
+            e.textContent = text;
+        }
+        var sg = document.getElementById('status-grid');
+        if (sg) {
+            sg.textContent = t('status.grid', { size: state.gridSize });
         }
         var d = document.getElementById('btn-delete'); if (d) d.disabled = state.selectedIds.size === 0;
         updateUndoRedoButtons();
@@ -3453,7 +3930,7 @@
         try {
             const parsed = parseDSLToState(codeStr);
             if (!parsed || !Array.isArray(parsed.elements)) {
-                alert('Ungültiger Zeichnungs-Code!');
+                alert(t('shareBar.invalidCode'));
                 return;
             }
             saveSnapshot();
@@ -3478,13 +3955,13 @@
                 if (gi) gi.value = state.gridSize;
                 updateGridPattern();
                 var sg = document.getElementById('status-grid');
-                if (sg) sg.textContent = 'Raster: ' + state.gridSize + ' px';
+                if (sg) sg.textContent = t('status.grid', { size: state.gridSize });
             }
             handleSelectElement(null);
             updateStatusBar();
         } catch (e) {
             console.error('Fehler beim Laden des Codes:', e);
-            alert('Fehler beim Laden des Zeichnungs-Codes: ' + e.message);
+            alert(t('shareBar.loadError') + e.message);
         }
     }
 
@@ -3501,7 +3978,7 @@
                 try {
                     navigator.clipboard.writeText(input.value);
                     const oldText = copyBtn.textContent;
-                    copyBtn.textContent = 'Kopiert!';
+                    copyBtn.textContent = t('shareBar.copied');
                     copyBtn.style.background = '#10b981';
                     copyBtn.style.borderColor = '#10b981';
                     setTimeout(() => {

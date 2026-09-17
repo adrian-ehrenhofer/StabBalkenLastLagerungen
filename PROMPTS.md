@@ -107,3 +107,8 @@ Due to valuable user feedback, I revisited the app to add support for different 
 New version:
 
 <img src="./images/03_color_update.png" alt="Tool with colorful elements." width="600">
+
+### Internationalization
+Added a language switcher with the classic i18n approach (same session/context and model as above, 17.09.2026). 
+
+> Add a language switcher on the top right and a complete internationalization of the tool according to i18n. 

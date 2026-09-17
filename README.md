@@ -1,12 +1,12 @@
 # TM-Aufgabenbilder-Editor (stabbalkenlastlagerungen)
 
-A browser-based SVG editor for creating vector graphics of structural mechanics problems (Engineering Mechanics / Technische Mechanik). This tool is designed to help educators and students quickly draw beam diagrams with supports, joints, dimensions, and loads. 
+A browser-based SVG editor for creating vector graphics of structural mechanics problems (Technical Mechanics / Technische Mechanik). This tool is designed to help educators and students quickly draw beam diagrams with supports, joints, dimensions, and loads.
 
-<img src="./images/02_final.png" alt="First version of the tool" width="600">
+Live Demo (GitHub Pages): [*\[StabBalkenLastLagerungen\]*](https://adrian-ehrenhofer.github.io/StabBalkenLastLagerungen/)
 
 ---
 
-## Features
+## 🚀 Features
 
 * **Structural Elements**:
   * **Beams (Stäbe)**: Straight beams, curved beams, and truss bars (Pendelstäbe).
@@ -22,15 +22,16 @@ A browser-based SVG editor for creating vector graphics of structural mechanics 
   * Grid alignment with toggleable snap-to-grid.
   * Infinite canvas panning and zoom.
   * Undo / Redo history stack.
-  * "Randomize" tool to instantly generate an example system.
+  * "Randomize" tool to instantly generate a mock system.
 * **Save & Export**:
   * Export clean, cropped vector files (**SVG**) or raster images (**PNG**).
   * Copy/paste a compact design code to save, share, or load drawings.
-* **New update**:
+* **New update V2.0**:
   * Now with different colors!
+  * Internationalized with i18n.
 ---
 
-## Repository Structure
+## 📁 Repository Structure
 
 ```
 stabbalkenlastlagerungen/
@@ -44,16 +45,18 @@ stabbalkenlastlagerungen/
 │   ├── interactions.js # Mouse and touch drawing/selection handlers
 │   ├── properties.js   # Sidebar form elements and event bindings
 │   └── export.js       # SVG and PNG file generator logic
+├── sbom.json           # CycloneDX Software Bill of Materials (0 dependencies)
+└── LICENSES.md         # License audit and relicensing analysis
 ```
 
 ---
 
-## Local Development / Quick Start
+## 💻 Local Development / Quick Start
 
 This project has **zero external dependencies** and does not require a compilation step.
 
 1. Clone this repository.
-2. Open index.html directly in any modern web browser.
+2. Open [index.html](file:///home/ml_trainer/coding_antigravity_workspace/stabbalkenlastlagerungen/index.html) directly in any modern web browser.
 3. *Optional*: Serve it locally using a simple HTTP server:
    ```bash
    # Python 3
@@ -63,12 +66,6 @@ This project has **zero external dependencies** and does not require a compilati
 
 ---
 
-## Contribution
+## 📝 License
 
-If you like to contribute, e.g., by adding other language versions, please feel free to create your fork. You can also contact me for future steps of this small software tool! 
-
----
-
-## License
-
-This project was developed by Adrian Ehrenhofer for educational purposes and is intended to be used as free as possible under the Unlicense. See LICENSE.md for details.
+This project was developed by Adrian Ehrenhofer for educational purposes at TU Dresden. See [LICENSES.md](file:///home/ml_trainer/coding_antigravity_workspace/stabbalkenlastlagerungen/LICENSES.md) for detailed information on dependencies, copyright terms, and the feasibility of releasing the codebase under the Unlicense.
