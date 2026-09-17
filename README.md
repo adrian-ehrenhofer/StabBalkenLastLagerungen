@@ -26,7 +26,8 @@ A browser-based SVG editor for creating vector graphics of structural mechanics 
 * **Save & Export**:
   * Export clean, cropped vector files (**SVG**) or raster images (**PNG**).
   * Copy/paste a compact design code to save, share, or load drawings.
-
+* **New update**:
+  * Now with different colors!
 ---
 
 ## Repository Structure

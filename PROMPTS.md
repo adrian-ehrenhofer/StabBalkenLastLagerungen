@@ -93,6 +93,17 @@ After some additional double-checks and corrections in the codebase (e.g., corre
 
 
 
+### Change of textboxes, colors, line fixes
+Due to valuable user feedback, I revisited the app to add support for different colors, allow the change of the text boxes (for other languages) and to change the line styles in the cross-section views. 
 
+#### Tooling for update
+- Model: Gemini 3.8 Flash in Google Antigravity IDE
+- Date: 17.09.2026
 
+>In the Stabbalkenlastlagerung app [index.html](...) for all elements in [elements.js](...) , include the additional property to switch colors. Default is black and there should be the possibility to add a color code and there should also be a classic color switcher. 
+>Furthermore, for all text fields that are displayed, like "Schnitt", add an option to change the displayed name with a text field.
+> In the cross-sections, add the possibility to switch between line styles, e.g., to make a hole in solid lines or dashed lines. 
 
+New version:
+
+<img src="./images/03_color_update.png" alt="Tool with colorful elements." width="600">
